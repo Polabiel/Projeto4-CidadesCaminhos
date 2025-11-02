@@ -28,7 +28,16 @@ namespace Proj4
 
     private void Form1_Load(object sender, EventArgs e)
     {
-
+      // Executar testes das estruturas de dados ao carregar a aplicação
+      // Os resultados serão exibidos na janela de saída do console/debug
+      try
+      {
+        TestDataStructures.ExecutarTodosTestes();
+      }
+      catch (Exception ex)
+      {
+        System.Diagnostics.Debug.WriteLine("Erro ao executar testes: " + ex.Message);
+      }
     }
 
     private void pnlArvore_Paint(object sender, PaintEventArgs e)
