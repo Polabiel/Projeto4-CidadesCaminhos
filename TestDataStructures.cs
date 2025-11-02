@@ -181,14 +181,17 @@ public static class TestDataStructures
   /// </summary>
   private class CidadeTeste : IComparable<CidadeTeste>, IRegistro
   {
+    private const int TAMANHO_NOME = 25;
+    private const int TAMANHO_REGISTRO = TAMANHO_NOME + (2 * sizeof(double)); // 25 + 16 = 41
+
     public string Nome { get; set; }
     public double X { get; set; }
     public double Y { get; set; }
-    public int TamanhoRegistro => 33;
+    public int TamanhoRegistro => TAMANHO_REGISTRO;
 
     public CidadeTeste(string nome, double x, double y)
     {
-      Nome = nome.PadRight(25);
+      Nome = nome.PadRight(TAMANHO_NOME);
       X = x;
       Y = y;
     }

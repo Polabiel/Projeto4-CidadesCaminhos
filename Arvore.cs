@@ -251,6 +251,10 @@ public class Arvore<Dado>
     int posicaoFinal = (int)origem.Length / dado.TamanhoRegistro - 1;
     Particionar(0, posicaoFinal, ref raiz);
     origem.Close();
+    
+    // Recalcula alturas em uma única passagem após carregar toda a árvore
+    RecalcularAlturas(raiz);
+    
     void Particionar(long inicio, long fim, ref NoArvore<Dado> noAtual)
     {
       if (inicio <= fim)
@@ -265,9 +269,18 @@ public class Arvore<Dado>
         var novoDir = noAtual.Dir;
         Particionar(meio + 1, fim, ref novoDir); // Particiona à direita 
         noAtual.Dir = novoDir;
-        // Atualizar altura após carregar
-        AtualizarAltura(noAtual);
       }
+    }
+  }
+
+  // Recalcula alturas de toda a árvore em uma única passagem pós-ordem
+  private void RecalcularAlturas(NoArvore<Dado> no)
+  {
+    if (no != null)
+    {
+      RecalcularAlturas(no.Esq);
+      RecalcularAlturas(no.Dir);
+      AtualizarAltura(no);
     }
   }
 
