@@ -23,6 +23,87 @@ public class Arvore<Dado>
     raiz = atual = antecessor = null;
   }
 
+  // Métodos auxiliares para AVL
+  private int Altura(NoArvore<Dado> no)
+  {
+    return no == null ? 0 : no.Altura;
+  }
+
+  private int FatorBalanceamento(NoArvore<Dado> no)
+  {
+    return no == null ? 0 : Altura(no.Esq) - Altura(no.Dir);
+  }
+
+  private void AtualizarAltura(NoArvore<Dado> no)
+  {
+    if (no != null)
+      no.Altura = 1 + Math.Max(Altura(no.Esq), Altura(no.Dir));
+  }
+
+  // Rotação simples à direita
+  private NoArvore<Dado> RotacaoDireita(NoArvore<Dado> y)
+  {
+    NoArvore<Dado> x = y.Esq;
+    NoArvore<Dado> T2 = x.Dir;
+
+    x.Dir = y;
+    y.Esq = T2;
+
+    AtualizarAltura(y);
+    AtualizarAltura(x);
+
+    return x;
+  }
+
+  // Rotação simples à esquerda
+  private NoArvore<Dado> RotacaoEsquerda(NoArvore<Dado> x)
+  {
+    NoArvore<Dado> y = x.Dir;
+    NoArvore<Dado> T2 = y.Esq;
+
+    y.Esq = x;
+    x.Dir = T2;
+
+    AtualizarAltura(x);
+    AtualizarAltura(y);
+
+    return y;
+  }
+
+  // Balancear nó após inserção ou remoção
+  private NoArvore<Dado> Balancear(NoArvore<Dado> no)
+  {
+    if (no == null)
+      return null;
+
+    AtualizarAltura(no);
+    int balance = FatorBalanceamento(no);
+
+    // Caso Esquerda-Esquerda
+    if (balance > 1 && FatorBalanceamento(no.Esq) >= 0)
+      return RotacaoDireita(no);
+
+    // Caso Esquerda-Direita
+    if (balance > 1 && FatorBalanceamento(no.Esq) < 0)
+    {
+      no.Esq = RotacaoEsquerda(no.Esq);
+      return RotacaoDireita(no);
+    }
+
+    // Caso Direita-Direita
+    if (balance < -1 && FatorBalanceamento(no.Dir) <= 0)
+      return RotacaoEsquerda(no);
+
+    // Caso Direita-Esquerda
+    if (balance < -1 && FatorBalanceamento(no.Dir) > 0)
+    {
+      no.Dir = RotacaoDireita(no.Dir);
+      return RotacaoEsquerda(no);
+    }
+
+    return no;
+  }
+
   public void VisitarEmOrdem(List<Dado> lista)
   {
     VisitarEmOrdem(raiz, lista);
@@ -92,93 +173,73 @@ public class Arvore<Dado>
     if (Existe(novoDado)) // achou!
       return false;       // não incluiu pois já existe
 
-    if (raiz == null)
-      raiz = new NoArvore<Dado>(novoDado);
-    else
-      // não achou, mas o método Existe() ajustou antecessor e noAtual
-      // antecessor é o pai do novo nó a incluir, decidimos para que
-      // lado será feita a ligação com o nó antecessor
-      if (novoDado.CompareTo(antecessor.Info) < 0)
-        antecessor.Esq = new NoArvore<Dado>(novoDado);  // liga à esquerda
-      else
-        antecessor.Dir = new NoArvore<Dado>(novoDado);  // liga à direita
+    raiz = InserirAVL(raiz, novoDado);
     return true;    // feita a inclusão
+  }
+
+  // Método recursivo para inserção com balanceamento AVL
+  private NoArvore<Dado> InserirAVL(NoArvore<Dado> no, Dado dado)
+  {
+    // 1. Inserção BST normal
+    if (no == null)
+      return new NoArvore<Dado>(dado);
+
+    if (dado.CompareTo(no.Info) < 0)
+      no.Esq = InserirAVL(no.Esq, dado);
+    else if (dado.CompareTo(no.Info) > 0)
+      no.Dir = InserirAVL(no.Dir, dado);
+    else
+      return no; // duplicata não permitida
+
+    // 2. Atualizar altura e balancear
+    return Balancear(no);
   }
 
   public bool Excluir(Dado dadoAExcluir)
   {
-    if (Existe(dadoAExcluir)) // ajusta os ponteiros atual e antecessor
+    if (!Existe(dadoAExcluir))
+      return false;
+
+    raiz = ExcluirAVL(raiz, dadoAExcluir);
+    return true;
+  }
+
+  // Método recursivo para remoção com balanceamento AVL
+  private NoArvore<Dado> ExcluirAVL(NoArvore<Dado> no, Dado dado)
+  {
+    if (no == null)
+      return null;
+
+    // 1. Remoção BST normal
+    if (dado.CompareTo(no.Info) < 0)
+      no.Esq = ExcluirAVL(no.Esq, dado);
+    else if (dado.CompareTo(no.Info) > 0)
+      no.Dir = ExcluirAVL(no.Dir, dado);
+    else
     {
-      // se atual (nó procurado e encontrado) é a raiz, e a raiz
-      // não tem filhos, simplesmente removemos essa raiz colocando
-      // null no seu ponteiro (atributo raiz)
-      if (atual == raiz && raiz.Esq == null && raiz.Dir == null)
-      { 
-        raiz = null;    // removemos o único nó dessa árvore
-        return true;
-      }
+      // Nó com um filho ou sem filhos
+      if (no.Esq == null)
+        return no.Dir;
+      else if (no.Dir == null)
+        return no.Esq;
 
-      // atual não é a raiz 
-      // se o nó a excluir é uma folha:
-      if (atual.Esq == null && atual.Dir == null)
-      {
-        // descobrimos de que lado do antecessor o atual está
-        if (atual.Info.CompareTo(antecessor.Info) < 0)
-           antecessor.Esq = null;  // filho esquerdo é desligado do pai
-        else
-          antecessor.Dir = null;  // filho direito é desligado do pai
-        
-        return true;  // nó desejado foi removido
-      }
-
-      // se o fluxo de execução chegar aqui, é porque o nó atual
-      // tem, pelo menos, um filho
-
-      // 2o caso: nó a excluir com um único filho
-      if ((atual.Esq != null) != (atual.Dir != null))
-      {
-        // descobrir de que lado o atual (filho) é apontado pelo
-        // antecessor (pai do nó a excluir)
-        if (atual.Info.CompareTo(antecessor.Info) < 0)  // atual à esquerda do seu pai
-        { 
-          if (atual.Esq == null)
-            antecessor.Esq = atual.Dir;
-          else
-            antecessor.Esq = atual.Esq;
-        }
-        else   // pai aponta o atual (filho) à direita
-        {                                 // e terá de apontar o neto
-          if (atual.Esq == null)
-            antecessor.Dir = atual.Dir;
-          else
-            antecessor.Dir = atual.Esq;
-        }
-        return true;  // excluiu nó com um único filho
-      }
-
-      // 3o caso: nó a excluir tem os dois filhos (Esq e Dir)
-      // apontamos o filho esquerdo do nó a excluir:
-      NoArvore<Dado> antMaior = atual;
-      var maiorDosMenores = atual.Esq;
-
-      // agora vamos todo o possível para a direita para acharmos
-      // a maior das chaves menores que a do nó a excluir (atual)
-      while (maiorDosMenores.Dir != null)
-      {
-        antMaior = maiorDosMenores;
-        maiorDosMenores = maiorDosMenores.Dir;  // à direita estão as maiores chaves
-      }
-
-      // substitui a informação do atual pela informação do nó com
-      // a maior das menores chaves em relação ao atual
-      atual.Info = maiorDosMenores.Info;
-      if (antMaior.Esq == maiorDosMenores)
-        antMaior.Esq = null;  // quando há só um nó à esquerda do nó a excluir
-      else
-        antMaior.Dir = maiorDosMenores.Esq;   // neto do pai do nó excluído
-      return true;
+      // Nó com dois filhos: pegar o menor da subárvore direita
+      NoArvore<Dado> temp = ObterMenorNo(no.Dir);
+      no.Info = temp.Info;
+      no.Dir = ExcluirAVL(no.Dir, temp.Info);
     }
-    return false;
+
+    // 2. Atualizar altura e balancear
+    return Balancear(no);
+  }
+
+  // Método auxiliar para encontrar o menor nó
+  private NoArvore<Dado> ObterMenorNo(NoArvore<Dado> no)
+  {
+    NoArvore<Dado> atual = no;
+    while (atual.Esq != null)
+      atual = atual.Esq;
+    return atual;
   }
 
   public void LerArquivoDeRegistros(string nomeArquivo)
@@ -204,6 +265,8 @@ public class Arvore<Dado>
         var novoDir = noAtual.Dir;
         Particionar(meio + 1, fim, ref novoDir); // Particiona à direita 
         noAtual.Dir = novoDir;
+        // Atualizar altura após carregar
+        AtualizarAltura(noAtual);
       }
     }
   }
