@@ -20,6 +20,11 @@ namespace Proj4
       set => nome = value.PadRight(tamanhoNome, ' ').Substring(0, tamanhoNome);
     }
 
+    public ListaSimples<Ligacao> Ligacoes
+    {
+      get => ligacoes;
+    }
+
     public Cidade(string nome, double x, double y)
     {
       this.Nome = nome;
@@ -46,6 +51,19 @@ namespace Proj4
     public int CompareTo(Cidade outraCid)
     {
       return Nome.CompareTo(outraCid.Nome);
+    }
+
+    public override bool Equals(object obj)
+    {
+      if (!(obj is Cidade outraCidade))
+        return false;
+      
+      return Nome.Equals(outraCidade.Nome);
+    }
+
+    public override int GetHashCode()
+    {
+      return Nome.GetHashCode();
     }
 
     public int TamanhoRegistro { get => tamanhoRegistro; }
