@@ -110,12 +110,19 @@ namespace Proj4
 
     public void LerRegistro(BinaryReader arquivo, long qualRegistro)
     {
-
+      arquivo.BaseStream.Seek(qualRegistro * tamanhoRegistro, SeekOrigin.Begin);
+      byte[] nomeBytes = arquivo.ReadBytes(tamanhoNome);
+      this.nome = System.Text.Encoding.Default.GetString(nomeBytes);
+      this.x = arquivo.ReadDouble();
+      this.y = arquivo.ReadDouble();
     }
 
     public void GravarRegistro(BinaryWriter arquivo)
     {
-
+      byte[] nomeBytes = System.Text.Encoding.Default.GetBytes(Nome.PadRight(tamanhoNome, ' ').Substring(0, tamanhoNome));
+      arquivo.Write(nomeBytes);
+      arquivo.Write(x);
+      arquivo.Write(y);
     }
   }
 

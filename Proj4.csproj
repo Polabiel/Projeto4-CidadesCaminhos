@@ -46,6 +46,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="ArquivoHelper.cs" />
     <Compile Include="Arvore.cs" />
     <Compile Include="Cidade.cs" />
     <Compile Include="FilaLista.cs" />
