@@ -78,22 +78,22 @@ public class Arvore<Dado>
     int fator = ObterFatorBalanceamento(no);
 
     // Caso Esquerda-Esquerda
-    if (fator > 1 && dado.CompareTo(no.Esq.Info) < 0)
+    if (fator > 1 && no.Esq != null && dado.CompareTo(no.Esq.Info) < 0)
       return RotacaoDireita(no);
 
     // Caso Direita-Direita
-    if (fator < -1 && dado.CompareTo(no.Dir.Info) > 0)
+    if (fator < -1 && no.Dir != null && dado.CompareTo(no.Dir.Info) > 0)
       return RotacaoEsquerda(no);
 
     // Caso Esquerda-Direita
-    if (fator > 1 && dado.CompareTo(no.Esq.Info) > 0)
+    if (fator > 1 && no.Esq != null && dado.CompareTo(no.Esq.Info) > 0)
     {
       no.Esq = RotacaoEsquerda(no.Esq);
       return RotacaoDireita(no);
     }
 
     // Caso Direita-Esquerda
-    if (fator < -1 && dado.CompareTo(no.Dir.Info) < 0)
+    if (fator < -1 && no.Dir != null && dado.CompareTo(no.Dir.Info) < 0)
     {
       no.Dir = RotacaoDireita(no.Dir);
       return RotacaoEsquerda(no);
@@ -307,6 +307,8 @@ public class Arvore<Dado>
         var novoDir = noAtual.Dir;
         Particionar(meio + 1, fim, ref novoDir); // Particiona à direita 
         noAtual.Dir = novoDir;
+        // Atualizar altura do nó após construir subárvores
+        AtualizarAltura(noAtual);
       }
     }
   }

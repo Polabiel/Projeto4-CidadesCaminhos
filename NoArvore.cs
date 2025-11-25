@@ -24,7 +24,10 @@ public class NoArvore<Dado> : IComparable<NoArvore<Dado>>
     this.Info = dados;
     this.Esq = esquerdo;
     this.Dir = direito;
-    this.altura = 1;
+    // Calcular altura baseado nos filhos
+    int alturaEsq = esquerdo != null ? esquerdo.Altura : 0;
+    int alturaDir = direito != null ? direito.Altura : 0;
+    this.altura = 1 + Math.Max(alturaEsq, alturaDir);
   }
 
   public Dado Info 
