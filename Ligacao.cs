@@ -38,6 +38,9 @@ namespace Proj4
     public int CompareTo(Ligacao other)
     {
       if (other == null) return 1;
+      if (cidadeDestino == null && other.cidadeDestino == null) return 0;
+      if (cidadeDestino == null) return -1;
+      if (other.cidadeDestino == null) return 1;
       return cidadeDestino.CompareTo(other.cidadeDestino);
     }
 
@@ -52,6 +55,8 @@ namespace Proj4
         return false;
       
       Ligacao outra = (Ligacao)obj;
+      if (cidadeDestino == null && outra.cidadeDestino == null) return true;
+      if (cidadeDestino == null || outra.cidadeDestino == null) return false;
       return cidadeDestino == outra.cidadeDestino;
     }
 

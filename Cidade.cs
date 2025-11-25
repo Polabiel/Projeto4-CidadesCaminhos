@@ -60,6 +60,8 @@ namespace Proj4
         return false;
       
       Cidade outra = (Cidade)obj;
+      if (Nome == null && outra.Nome == null) return true;
+      if (Nome == null || outra.Nome == null) return false;
       return Nome.Equals(outra.Nome);
     }
 
