@@ -44,7 +44,7 @@
       this.btnIncluirCaminho = new System.Windows.Forms.Button();
       this.label5 = new System.Windows.Forms.Label();
       this.label4 = new System.Windows.Forms.Label();
-      this.numericUpDown1 = new System.Windows.Forms.NumericUpDown();
+      this.nudDistancia = new System.Windows.Forms.NumericUpDown();
       this.txtNovoDestino = new System.Windows.Forms.TextBox();
       this.dgvLigacoes = new System.Windows.Forms.DataGridView();
       this.Column1 = new System.Windows.Forms.DataGridViewTextBoxColumn();
@@ -69,7 +69,7 @@
       ((System.ComponentModel.ISupportInitialize)(this.dgvRotas)).BeginInit();
       this.groupBox1.SuspendLayout();
       this.groupBox2.SuspendLayout();
-      ((System.ComponentModel.ISupportInitialize)(this.numericUpDown1)).BeginInit();
+      ((System.ComponentModel.ISupportInitialize)(this.nudDistancia)).BeginInit();
       ((System.ComponentModel.ISupportInitialize)(this.dgvLigacoes)).BeginInit();
       ((System.ComponentModel.ISupportInitialize)(this.udY)).BeginInit();
       ((System.ComponentModel.ISupportInitialize)(this.udX)).BeginInit();
@@ -211,7 +211,7 @@
       this.groupBox2.Controls.Add(this.btnIncluirCaminho);
       this.groupBox2.Controls.Add(this.label5);
       this.groupBox2.Controls.Add(this.label4);
-      this.groupBox2.Controls.Add(this.numericUpDown1);
+      this.groupBox2.Controls.Add(this.nudDistancia);
       this.groupBox2.Controls.Add(this.txtNovoDestino);
       this.groupBox2.Controls.Add(this.dgvLigacoes);
       this.groupBox2.Location = new System.Drawing.Point(6, 137);
@@ -259,17 +259,17 @@
       this.label4.TabIndex = 6;
       this.label4.Text = "Novo destino";
       // 
-      // numericUpDown1
+      // nudDistancia
       // 
-      this.numericUpDown1.Location = new System.Drawing.Point(236, 254);
-      this.numericUpDown1.Maximum = new decimal(new int[] {
+      this.nudDistancia.Location = new System.Drawing.Point(236, 254);
+      this.nudDistancia.Maximum = new decimal(new int[] {
             1000,
             0,
             0,
             0});
-      this.numericUpDown1.Name = "numericUpDown1";
-      this.numericUpDown1.Size = new System.Drawing.Size(67, 24);
-      this.numericUpDown1.TabIndex = 5;
+      this.nudDistancia.Name = "nudDistancia";
+      this.nudDistancia.Size = new System.Drawing.Size(67, 24);
+      this.nudDistancia.TabIndex = 5;
       // 
       // txtNovoDestino
       // 
@@ -462,7 +462,7 @@
       this.groupBox1.PerformLayout();
       this.groupBox2.ResumeLayout(false);
       this.groupBox2.PerformLayout();
-      ((System.ComponentModel.ISupportInitialize)(this.numericUpDown1)).EndInit();
+      ((System.ComponentModel.ISupportInitialize)(this.nudDistancia)).EndInit();
       ((System.ComponentModel.ISupportInitialize)(this.dgvLigacoes)).EndInit();
       ((System.ComponentModel.ISupportInitialize)(this.udY)).EndInit();
       ((System.ComponentModel.ISupportInitialize)(this.udX)).EndInit();
@@ -493,7 +493,7 @@
     private System.Windows.Forms.DataGridView dgvLigacoes;
     private System.Windows.Forms.Label label5;
     private System.Windows.Forms.Label label4;
-    private System.Windows.Forms.NumericUpDown numericUpDown1;
+    private System.Windows.Forms.NumericUpDown nudDistancia;
     private System.Windows.Forms.TextBox txtNovoDestino;
     private System.Windows.Forms.Button btnExcluirCaminho;
     private System.Windows.Forms.Button btnIncluirCaminho;

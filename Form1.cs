@@ -4,6 +4,7 @@ using System.ComponentModel;
 using System.Data;
 using System.Drawing;
 using System.IO;
+using System.Linq;
 using System.Windows.Forms;
 
 namespace Proj4
@@ -126,6 +127,7 @@ namespace Proj4
       else
       {
         cidadeAtual = null;
+        LimparCamposCidade();
       }
     }
     
@@ -134,6 +136,13 @@ namespace Proj4
     /// </summary>
     private void pbMapa_MouseClick(object sender, MouseEventArgs e)
     {
+      // Verifica se as dimensões do PictureBox são válidas
+      if (pbMapa.Width <= 0 || pbMapa.Height <= 0)
+      {
+        MessageBox.Show("O mapa não está disponível ou não foi inicializado corretamente.", "Erro", MessageBoxButtons.OK, MessageBoxIcon.Error);
+        return;
+      }
+      
       // Calcula coordenadas proporcionais (0 a 1)
       double xProporcional = (double)e.X / pbMapa.Width;
       double yProporcional = (double)e.Y / pbMapa.Height;
@@ -220,6 +229,7 @@ namespace Proj4
       cidadeAtual.X = (double)udX.Value;
       cidadeAtual.Y = (double)udY.Value;
       
+      pnlArvore.Invalidate();
       MessageBox.Show("Cidade alterada com sucesso!", "Sucesso", MessageBoxButtons.OK, MessageBoxIcon.Information);
     }
     
@@ -275,15 +285,7 @@ namespace Proj4
       List<Cidade> cidades = new List<Cidade>();
       arvore.VisitarEmOrdem(cidades);
       
-      foreach (Cidade cidade in cidades)
-      {
-        if (cidade.ExisteLigacao(nomeCidade))
-        {
-          return true;
-        }
-      }
-      
-      return false;
+      return cidades.Where(c => c.ExisteLigacao(nomeCidade)).Any();
     }
     
     /// <summary>
@@ -357,7 +359,7 @@ namespace Proj4
       }
       
       string cidadeDestino = txtNovoDestino.Text.Trim();
-      int distancia = (int)numericUpDown1.Value;
+      int distancia = (int)nudDistancia.Value;
       
       if (string.IsNullOrEmpty(cidadeDestino))
       {
@@ -369,7 +371,7 @@ namespace Proj4
       if (distancia <= 0)
       {
         MessageBox.Show("A distância deve ser maior que zero.", "Aviso", MessageBoxButtons.OK, MessageBoxIcon.Warning);
-        numericUpDown1.Focus();
+        nudDistancia.Focus();
         return;
       }
       
@@ -382,7 +384,7 @@ namespace Proj4
       }
       
       // Verifica se não está tentando criar ligação para a mesma cidade
-      if (cidadeDestino.Equals(cidadeAtual.Nome.Trim(), StringComparison.OrdinalIgnoreCase))
+      if (cidadeDestino.Equals(cidadeAtual.Nome.Trim()))
       {
         MessageBox.Show("Não é possível criar uma ligação de uma cidade para ela mesma.", "Aviso", MessageBoxButtons.OK, MessageBoxIcon.Warning);
         return;
@@ -393,7 +395,7 @@ namespace Proj4
         MessageBox.Show("Ligação adicionada com sucesso!", "Sucesso", MessageBoxButtons.OK, MessageBoxIcon.Information);
         AtualizarDataGridLigacoes();
         txtNovoDestino.Text = "";
-        numericUpDown1.Value = 0;
+        nudDistancia.Value = 0;
       }
       else
       {
