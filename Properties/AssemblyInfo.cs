@@ -1,4 +1,13 @@
-﻿using System.Reflection;
+// ============================================================
+// Projeto 4 - Cadastro de Cidades e Caminhos
+// Disciplina: Estruturas de Dados - 2o DSNot 2025
+// ------------------------------------------------------------
+// Alunos:
+//   Andrew Douglas Nithack - RA: 23305
+//   Gabriel Oliveira dos Santos - RA: 23600
+// ============================================================
+
+using System.Reflection;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 
@@ -6,7 +15,7 @@ using System.Runtime.InteropServices;
 // conjunto de atributos. Altere estes valores de atributo para modificar as informações
 // associadas a um assembly.
 [assembly: AssemblyTitle("Proj4")]
-[assembly: AssemblyDescription("")]
+[assembly: AssemblyDescription("Projeto 4 - Cadastro de Cidades e Caminhos - Estruturas de Dados 2025")]
 [assembly: AssemblyConfiguration("")]
 [assembly: AssemblyCompany("")]
 [assembly: AssemblyProduct("Proj4")]

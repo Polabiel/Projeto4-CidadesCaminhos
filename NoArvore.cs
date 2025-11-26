@@ -1,11 +1,20 @@
-﻿using System;
+// ============================================================
+// Projeto 4 - Cadastro de Cidades e Caminhos
+// Disciplina: Estruturas de Dados - 2o DSNot 2025
+// ------------------------------------------------------------
+// Alunos:
+//   Andrew Douglas Nithack - RA: 23305
+//   Gabriel Oliveira dos Santos - RA: 23600
+// ============================================================
+
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
 
-public class NoArvore<Dado> : IComparable<NoArvore<Dado>> 
+public class NoArvore<Dado> : IComparable<NoArvore<Dado>>
              where Dado : IComparable<Dado>, IRegistro, new()
 {
   Dado info;           // informação armazenada neste nó da árvore
