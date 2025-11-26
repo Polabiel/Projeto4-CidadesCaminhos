@@ -24,13 +24,17 @@ namespace Proj4
     
     // Caminhos dos arquivos de dados
     private readonly string arquivoCidades = Path.Combine(Application.StartupPath, "Dados", "CidadesSaoPaulo.dat");
-    private readonly string arquivoLigacoes = Path.Combine(Application.StartupPath, "Dados", "GrafoOnibusSaoPaulo.txt");
+    private readonly string arquivoLigacoes = Path.Combine(Application.StartupPath, "Dados", "GrafonibusSaoPaulo.txt");
     
     // Cidade atualmente selecionada/carregada no formulário
     private Cidade cidadeAtual = null;
     
     // Resultado da busca do menor caminho (Dijkstra)
     private ResultadoDijkstra caminhoAtual = null;
+    
+    // Armazena último clique no mapa (proporcional) para uso na inclusão
+    private double? ultimoCliqueXProporcional = null;
+    private double? ultimoCliqueYProporcional = null;
     
     public Form1()
     {
@@ -114,6 +118,24 @@ namespace Proj4
     {
       arvore.Desenhar(e.Graphics, pnlArvore.Width, pnlArvore.Height);
     }
+
+    private void pnlArvore_MouseClick(object sender, MouseEventArgs e)
+    {
+      Cidade clicada = arvore.EncontrarNoPorClique(pnlArvore.CreateGraphics(), pnlArvore.Width, pnlArvore.Height, e.X, e.Y);
+      if (clicada != null)
+      {
+        // Seleciona a aba de cadastro e exibe a cidade
+        tabControl1.SelectedTab = tabControl1.TabPages[0];
+        cidadeAtual = clicada;
+        arvore.Selecionado = cidadeAtual;
+        ExibirCidade(cidadeAtual);
+        // Dar foco ao campo nome e selecionar todo o texto
+        txtNomeCidade.Focus();
+        txtNomeCidade.SelectAll();
+        // Repaint tree para mostrar destaque
+        pnlArvore.Invalidate();
+      }
+    }
     
     #region Manutenção de Cidades
     
@@ -126,7 +148,10 @@ namespace Proj4
       if (string.IsNullOrEmpty(nomeCidade))
       {
         cidadeAtual = null;
-        LimparCamposCidade();
+        // Keep textbox empty and clear other fields
+        udX.Value = 0;
+        udY.Value = 0;
+        dgvLigacoes.Rows.Clear();
         return;
       }
       
@@ -139,7 +164,10 @@ namespace Proj4
       else
       {
         cidadeAtual = null;
-        LimparCamposCidade();
+        // Don't clear txtNomeCidade: keep user's typed text so they can include the new city
+        udX.Value = 0;
+        udY.Value = 0;
+        dgvLigacoes.Rows.Clear();
       }
     }
     
@@ -148,49 +176,70 @@ namespace Proj4
     /// </summary>
     private void pbMapa_MouseClick(object sender, MouseEventArgs e)
     {
-      // Verifica se as dimensões do PictureBox são válidas
       if (pbMapa.Width <= 0 || pbMapa.Height <= 0)
       {
         MessageBox.Show("O mapa não está disponível ou não foi inicializado corretamente.", "Erro", MessageBoxButtons.OK, MessageBoxIcon.Error);
         return;
       }
-      
-      // Calcula coordenadas proporcionais (0 a 1)
+
       double xProporcional = (double)e.X / pbMapa.Width;
       double yProporcional = (double)e.Y / pbMapa.Height;
-      
-      // Atualiza os campos de coordenadas
-      udX.Value = (decimal)xProporcional;
-      udY.Value = (decimal)yProporcional;
+
+      xProporcional = Math.Min(1.0, Math.Max(0.0, xProporcional));
+      yProporcional = Math.Min(1.0, Math.Max(0.0, yProporcional));
+
+      ultimoCliqueXProporcional = xProporcional;
+      ultimoCliqueYProporcional = yProporcional;
+
+      udX.Value = Math.Round((decimal)xProporcional, 4);
+      udY.Value = Math.Round((decimal)yProporcional, 4);
+
+      // Dar foco ao campo X após clique
+      udX.Focus();
     }
-    
+
     /// <summary>
     /// Inclui uma nova cidade na árvore.
     /// </summary>
     private void btnIncluirCidade_Click(object sender, EventArgs e)
     {
       string nomeCidade = txtNomeCidade.Text.Trim();
-      
+
       if (string.IsNullOrEmpty(nomeCidade))
       {
         MessageBox.Show("Informe o nome da cidade.", "Aviso", MessageBoxButtons.OK, MessageBoxIcon.Warning);
         txtNomeCidade.Focus();
         return;
       }
-      
-      double x = (double)udX.Value;
-      double y = (double)udY.Value;
-      
+
+      double x, y;
+      if (ultimoCliqueXProporcional.HasValue && ultimoCliqueYProporcional.HasValue)
+      {
+        x = ultimoCliqueXProporcional.Value;
+        y = ultimoCliqueYProporcional.Value;
+      }
+      else
+      {
+        x = (double)udX.Value;
+        y = (double)udY.Value;
+      }
+
       Cidade novaCidade = new Cidade(nomeCidade, x, y);
-      
+
       if (arvore.IncluirNovoDado(novaCidade))
       {
         cidadeAtual = novaCidade;
-        MessageBox.Show("Cidade incluída com sucesso!", "Sucesso", MessageBoxButtons.OK, MessageBoxIcon.Information);
+        ultimoCliqueXProporcional = null;
+        ultimoCliqueYProporcional = null;
+
         AtualizarComboBoxDestino();
         AtualizarDataGridLigacoes();
         pnlArvore.Invalidate();
         pbMapa.Invalidate();
+
+        // Dar foco ao nome para edição rápida
+        txtNomeCidade.Focus();
+        txtNomeCidade.SelectAll();
       }
       else
       {
@@ -204,21 +253,24 @@ namespace Proj4
     private void btnBuscarCidade_Click(object sender, EventArgs e)
     {
       string nomeCidade = txtNomeCidade.Text.Trim();
-      
+
       if (string.IsNullOrEmpty(nomeCidade))
       {
         MessageBox.Show("Informe o nome da cidade para buscar.", "Aviso", MessageBoxButtons.OK, MessageBoxIcon.Warning);
         txtNomeCidade.Focus();
         return;
       }
-      
+
       Cidade cidadeBusca = new Cidade(nomeCidade);
-      
+
       if (arvore.Existe(cidadeBusca))
       {
         cidadeAtual = arvore.Atual.Info;
+        arvore.Selecionado = cidadeAtual;
         ExibirCidade(cidadeAtual);
-        MessageBox.Show("Cidade encontrada!", "Sucesso", MessageBoxButtons.OK, MessageBoxIcon.Information);
+        pnlArvore.Invalidate();
+        txtNomeCidade.Focus();
+        txtNomeCidade.SelectAll();
       }
       else
       {
@@ -237,14 +289,15 @@ namespace Proj4
         MessageBox.Show("Busque uma cidade primeiro para alterar.", "Aviso", MessageBoxButtons.OK, MessageBoxIcon.Warning);
         return;
       }
-      
-      // Atualiza as coordenadas da cidade atual
+
       cidadeAtual.X = (double)udX.Value;
       cidadeAtual.Y = (double)udY.Value;
-      
+
       pnlArvore.Invalidate();
       pbMapa.Invalidate();
-      MessageBox.Show("Cidade alterada com sucesso!", "Sucesso", MessageBoxButtons.OK, MessageBoxIcon.Information);
+
+      txtNomeCidade.Focus();
+      txtNomeCidade.SelectAll();
     }
     
     /// <summary>
@@ -257,29 +310,27 @@ namespace Proj4
         MessageBox.Show("Busque uma cidade primeiro para excluir.", "Aviso", MessageBoxButtons.OK, MessageBoxIcon.Warning);
         return;
       }
-      
-      // Verifica se a cidade possui ligações
+
       if (cidadeAtual.Ligacoes.QuantosNos > 0)
       {
         MessageBox.Show("Não é possível excluir uma cidade que possui ligações. Remova as ligações primeiro.", "Aviso", MessageBoxButtons.OK, MessageBoxIcon.Warning);
         return;
       }
-      
-      // Verifica se outras cidades possuem ligações para esta cidade
+
       if (ExistemLigacoesParaCidade(cidadeAtual.Nome.Trim()))
       {
         MessageBox.Show("Não é possível excluir esta cidade pois outras cidades possuem ligações para ela. Remova as ligações primeiro.", "Aviso", MessageBoxButtons.OK, MessageBoxIcon.Warning);
         return;
       }
-      
+
       DialogResult resultado = MessageBox.Show($"Deseja realmente excluir a cidade '{cidadeAtual.Nome.Trim()}'?", "Confirmação", MessageBoxButtons.YesNo, MessageBoxIcon.Question);
-      
+
       if (resultado == DialogResult.Yes)
       {
         if (arvore.Excluir(cidadeAtual))
         {
-          MessageBox.Show("Cidade excluída com sucesso!", "Sucesso", MessageBoxButtons.OK, MessageBoxIcon.Information);
           cidadeAtual = null;
+          arvore.Selecionado = default(Cidade);
           LimparCamposCidade();
           AtualizarComboBoxDestino();
           pnlArvore.Invalidate();

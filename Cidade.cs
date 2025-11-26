@@ -29,8 +29,9 @@ namespace Proj4
 
     public string Nome
     {
+      // Guarda o nome sem espaços extras. Pad apenas ao gravar em arquivo.
       get => nome;
-      set => nome = value.PadRight(tamanhoNome, ' ').Substring(0, tamanhoNome);
+      set => nome = (value ?? string.Empty).Trim();
     }
 
     public ListaSimples<Ligacao> Ligacoes
@@ -47,7 +48,7 @@ namespace Proj4
 
     public override string ToString()
     {
-      return Nome.TrimEnd() + " (" + ligacoes.QuantosNos + ")";
+      return Nome + " (" + ligacoes.QuantosNos + ")";
     }
 
     public Cidade()
@@ -125,13 +126,15 @@ namespace Proj4
     {
       arquivo.BaseStream.Seek(qualRegistro * tamanhoRegistro, SeekOrigin.Begin);
       byte[] nomeBytes = arquivo.ReadBytes(tamanhoNome);
-      this.nome = encodingArquivo.GetString(nomeBytes);
+      // Remove o padding ao ler do arquivo
+      this.nome = encodingArquivo.GetString(nomeBytes).TrimEnd();
       this.x = arquivo.ReadDouble();
       this.y = arquivo.ReadDouble();
     }
 
     public void GravarRegistro(BinaryWriter arquivo)
     {
+      // Ao gravar, padroniza em tamanho fixo
       byte[] nomeBytes = encodingArquivo.GetBytes(Nome.PadRight(tamanhoNome, ' ').Substring(0, tamanhoNome));
       arquivo.Write(nomeBytes);
       arquivo.Write(x);

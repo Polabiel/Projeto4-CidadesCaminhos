@@ -472,6 +472,7 @@ namespace Proj4
       this.pnlArvore.Location = new System.Drawing.Point(6, 3);
       this.pnlArvore.Name = "pnlArvore";
       this.pnlArvore.Size = new System.Drawing.Size(1641, 828);
+      this.pnlArvore.MouseClick += new System.Windows.Forms.MouseEventHandler(this.pnlArvore_MouseClick);
       this.pnlArvore.TabIndex = 0;
       this.pnlArvore.Paint += new System.Windows.Forms.PaintEventHandler(this.pnlArvore_Paint);
       // 

@@ -12,27 +12,15 @@ using System.Collections.Generic;
 
 namespace Proj4
 {
-  /// <summary>
-  /// Resultado da execução do algoritmo de Dijkstra.
-  /// Contém o caminho encontrado (lista de nomes de cidades) e a distância total.
-  /// </summary>
+
   public class ResultadoDijkstra
   {
-    /// <summary>
-    /// Lista de nomes de cidades que formam o caminho da origem ao destino.
-    /// Estará vazia se não houver caminho.
-    /// </summary>
+
     public List<string> Caminho { get; private set; }
 
-    /// <summary>
-    /// Distância total do caminho em km.
-    /// Será int.MaxValue se não houver caminho.
-    /// </summary>
+
     public int DistanciaTotal { get; private set; }
 
-    /// <summary>
-    /// Indica se um caminho foi encontrado.
-    /// </summary>
     public bool CaminhoEncontrado { get { return Caminho.Count > 0; } }
 
     public ResultadoDijkstra(List<string> caminho, int distanciaTotal)
@@ -42,19 +30,9 @@ namespace Proj4
     }
   }
 
-  /// <summary>
-  /// Implementação do algoritmo de Dijkstra para encontrar o menor caminho
-  /// entre duas cidades no grafo.
-  /// </summary>
   public static class Dijkstra
   {
-    /// <summary>
-    /// Encontra o menor caminho entre a cidade de origem e a cidade de destino.
-    /// </summary>
-    /// <param name="arvore">Árvore AVL contendo todas as cidades</param>
-    /// <param name="nomeOrigem">Nome da cidade de origem</param>
-    /// <param name="nomeDestino">Nome da cidade de destino</param>
-    /// <returns>Resultado contendo o caminho e a distância total</returns>
+    
     public static ResultadoDijkstra BuscarMenorCaminho(Arvore<Cidade> arvore, string nomeOrigem, string nomeDestino)
     {
       // Obtém todas as cidades da árvore
