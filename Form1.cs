@@ -100,7 +100,7 @@ namespace Proj4
 
     private void pnlArvore_Paint(object sender, PaintEventArgs e)
     {
-      arvore.Desenhar(pnlArvore);
+      arvore.Desenhar(e.Graphics, pnlArvore.Width, pnlArvore.Height);
     }
     
     #region Manutenção de Cidades
@@ -399,6 +399,7 @@ namespace Proj4
         AtualizarDataGridLigacoes();
         txtNovoDestino.Text = "";
         nudDistancia.Value = 0;
+        pnlArvore.Invalidate();
         pbMapa.Invalidate();
       }
       else
@@ -440,6 +441,7 @@ namespace Proj4
         {
           MessageBox.Show("Ligação excluída com sucesso!", "Sucesso", MessageBoxButtons.OK, MessageBoxIcon.Information);
           AtualizarDataGridLigacoes();
+          pnlArvore.Invalidate();
           pbMapa.Invalidate();
         }
         else
