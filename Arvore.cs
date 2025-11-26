@@ -117,11 +117,14 @@ public class Arvore<Dado>
     }
   }
 
+  // Fator de redução horizontal para espaçamento entre níveis da árvore
+  private const double FATOR_REDUCAO_HORIZONTAL = 2.05;
+
   public void Desenhar(Graphics g, int largura, int altura)
   {
      if (Raiz == null) return;
      
-     g.Clear(Color.White);
+     g.FillRectangle(Brushes.White, 0, 0, largura, altura);
      using (Font fonte = new Font("Arial", 9))
      {
        DesenharNo(g, Raiz, largura / 2, 30, largura / 4, 60, fonte);
@@ -135,11 +138,11 @@ public class Arvore<Dado>
     // Mede o tamanho do texto para dimensionar o nó adequadamente
     string texto = no.Info.ToString();
     SizeF tamanhoTexto = g.MeasureString(texto, fonte);
-    int largura = Math.Max((int)tamanhoTexto.Width + 10, 60);
-    int altura = Math.Max((int)tamanhoTexto.Height + 6, 24);
+    int larguraNo = Math.Max((int)tamanhoTexto.Width + 10, 60);
+    int alturaNo = Math.Max((int)tamanhoTexto.Height + 6, 24);
 
     // Desenha o retângulo do nó (retângulo arredondado é mais legível que elipse para texto)
-    Rectangle rect = new Rectangle(x - largura / 2, y - altura / 2, largura, altura);
+    Rectangle rect = new Rectangle(x - larguraNo / 2, y - alturaNo / 2, larguraNo, alturaNo);
     g.FillRectangle(Brushes.LightBlue, rect);
     g.DrawRectangle(Pens.Black, rect);
     
@@ -149,22 +152,22 @@ public class Arvore<Dado>
     g.DrawString(texto, fonte, Brushes.Black, textX, textY);
 
     // Desenha as conexões com os filhos
-    int yBase = y + altura / 2;
+    int yBase = y + alturaNo / 2;
     
     if (no.Esq != null)
     {
       int xFilhoEsq = x - deslocamentoX;
       int yFilho = y + deslocamentoY;
-      g.DrawLine(Pens.Black, x, yBase, xFilhoEsq, yFilho - altura / 2);
-      DesenharNo(g, no.Esq, xFilhoEsq, yFilho, (int)(deslocamentoX / 2.05), deslocamentoY, fonte);
+      g.DrawLine(Pens.Black, x, yBase, xFilhoEsq, yFilho - alturaNo / 2);
+      DesenharNo(g, no.Esq, xFilhoEsq, yFilho, (int)(deslocamentoX / FATOR_REDUCAO_HORIZONTAL), deslocamentoY, fonte);
     }
 
     if (no.Dir != null)
     {
       int xFilhoDir = x + deslocamentoX;
       int yFilho = y + deslocamentoY;
-      g.DrawLine(Pens.Black, x, yBase, xFilhoDir, yFilho - altura / 2);
-      DesenharNo(g, no.Dir, xFilhoDir, yFilho, (int)(deslocamentoX / 2.05), deslocamentoY, fonte);
+      g.DrawLine(Pens.Black, x, yBase, xFilhoDir, yFilho - alturaNo / 2);
+      DesenharNo(g, no.Dir, xFilhoDir, yFilho, (int)(deslocamentoX / FATOR_REDUCAO_HORIZONTAL), deslocamentoY, fonte);
     }
   }
 
