@@ -229,6 +229,7 @@
       this.btnExcluirCaminho.TabIndex = 9;
       this.btnExcluirCaminho.Text = "-";
       this.btnExcluirCaminho.UseVisualStyleBackColor = true;
+      this.btnExcluirCaminho.Click += new System.EventHandler(this.btnExcluirCaminho_Click);
       // 
       // btnIncluirCaminho
       // 
@@ -238,6 +239,7 @@
       this.btnIncluirCaminho.TabIndex = 8;
       this.btnIncluirCaminho.Text = "+";
       this.btnIncluirCaminho.UseVisualStyleBackColor = true;
+      this.btnIncluirCaminho.Click += new System.EventHandler(this.btnIncluirCaminho_Click);
       // 
       // label5
       // 
@@ -308,6 +310,7 @@
       this.btnExcluirCidade.TabIndex = 9;
       this.btnExcluirCidade.Text = "Excluir";
       this.btnExcluirCidade.UseVisualStyleBackColor = true;
+      this.btnExcluirCidade.Click += new System.EventHandler(this.btnExcluirCidade_Click);
       // 
       // btnAlterarCidade
       // 
@@ -317,6 +320,7 @@
       this.btnAlterarCidade.TabIndex = 8;
       this.btnAlterarCidade.Text = "Alterar";
       this.btnAlterarCidade.UseVisualStyleBackColor = true;
+      this.btnAlterarCidade.Click += new System.EventHandler(this.btnAlterarCidade_Click);
       // 
       // btnBuscarCidade
       // 
@@ -326,6 +330,7 @@
       this.btnBuscarCidade.TabIndex = 7;
       this.btnBuscarCidade.Text = "Buscar";
       this.btnBuscarCidade.UseVisualStyleBackColor = true;
+      this.btnBuscarCidade.Click += new System.EventHandler(this.btnBuscarCidade_Click);
       // 
       // udY
       // 
@@ -379,6 +384,7 @@
       this.txtNomeCidade.Name = "txtNomeCidade";
       this.txtNomeCidade.Size = new System.Drawing.Size(216, 24);
       this.txtNomeCidade.TabIndex = 2;
+      this.txtNomeCidade.Leave += new System.EventHandler(this.txtNomeCidade_Leave);
       // 
       // label1
       // 
@@ -397,6 +403,7 @@
       this.btnIncluirCidade.TabIndex = 0;
       this.btnIncluirCidade.Text = "Incluir";
       this.btnIncluirCidade.UseVisualStyleBackColor = true;
+      this.btnIncluirCidade.Click += new System.EventHandler(this.btnIncluirCidade_Click);
       // 
       // pbMapa
       // 
@@ -410,6 +417,7 @@
       this.pbMapa.SizeMode = System.Windows.Forms.PictureBoxSizeMode.StretchImage;
       this.pbMapa.TabIndex = 0;
       this.pbMapa.TabStop = false;
+      this.pbMapa.MouseClick += new System.Windows.Forms.MouseEventHandler(this.pbMapa_MouseClick);
       // 
       // tpArvore
       // 
