@@ -4,6 +4,7 @@ using System.ComponentModel;
 using System.Data;
 using System.Drawing;
 using System.IO;
+using System.Linq;
 using System.Windows.Forms;
 
 namespace Proj4
@@ -15,6 +16,9 @@ namespace Proj4
     // Caminhos dos arquivos de dados
     private readonly string arquivoCidades = Path.Combine(Application.StartupPath, "Dados", "cidades.dat");
     private readonly string arquivoLigacoes = Path.Combine(Application.StartupPath, "Dados", "GrafoOnibusSaoPaulo.txt");
+    
+    // Cidade atualmente selecionada/carregada no formulário
+    private Cidade cidadeAtual = null;
     
     public Form1()
     {
@@ -34,6 +38,7 @@ namespace Proj4
     private void Form1_Load(object sender, EventArgs e)
     {
       CarregarDados();
+      AtualizarComboBoxDestino();
     }
     
     /// <summary>
@@ -97,5 +102,348 @@ namespace Proj4
     {
       arvore.Desenhar(pnlArvore);
     }
+    
+    #region Manutenção de Cidades
+    
+    /// <summary>
+    /// Evento Leave do txtNomeCidade - valida se a cidade existe.
+    /// </summary>
+    private void txtNomeCidade_Leave(object sender, EventArgs e)
+    {
+      string nomeCidade = txtNomeCidade.Text.Trim();
+      if (string.IsNullOrEmpty(nomeCidade))
+      {
+        cidadeAtual = null;
+        LimparCamposCidade();
+        return;
+      }
+      
+      Cidade cidadeBusca = new Cidade(nomeCidade);
+      if (arvore.Existe(cidadeBusca))
+      {
+        cidadeAtual = arvore.Atual.Info;
+        ExibirCidade(cidadeAtual);
+      }
+      else
+      {
+        cidadeAtual = null;
+        LimparCamposCidade();
+      }
+    }
+    
+    /// <summary>
+    /// Evento Click do pbMapa usando MouseClick para coordenadas.
+    /// </summary>
+    private void pbMapa_MouseClick(object sender, MouseEventArgs e)
+    {
+      // Verifica se as dimensões do PictureBox são válidas
+      if (pbMapa.Width <= 0 || pbMapa.Height <= 0)
+      {
+        MessageBox.Show("O mapa não está disponível ou não foi inicializado corretamente.", "Erro", MessageBoxButtons.OK, MessageBoxIcon.Error);
+        return;
+      }
+      
+      // Calcula coordenadas proporcionais (0 a 1)
+      double xProporcional = (double)e.X / pbMapa.Width;
+      double yProporcional = (double)e.Y / pbMapa.Height;
+      
+      // Atualiza os campos de coordenadas
+      udX.Value = (decimal)xProporcional;
+      udY.Value = (decimal)yProporcional;
+    }
+    
+    /// <summary>
+    /// Inclui uma nova cidade na árvore.
+    /// </summary>
+    private void btnIncluirCidade_Click(object sender, EventArgs e)
+    {
+      string nomeCidade = txtNomeCidade.Text.Trim();
+      
+      if (string.IsNullOrEmpty(nomeCidade))
+      {
+        MessageBox.Show("Informe o nome da cidade.", "Aviso", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+        txtNomeCidade.Focus();
+        return;
+      }
+      
+      double x = (double)udX.Value;
+      double y = (double)udY.Value;
+      
+      Cidade novaCidade = new Cidade(nomeCidade, x, y);
+      
+      if (arvore.IncluirNovoDado(novaCidade))
+      {
+        cidadeAtual = novaCidade;
+        MessageBox.Show("Cidade incluída com sucesso!", "Sucesso", MessageBoxButtons.OK, MessageBoxIcon.Information);
+        AtualizarComboBoxDestino();
+        AtualizarDataGridLigacoes();
+        pnlArvore.Invalidate();
+      }
+      else
+      {
+        MessageBox.Show("Cidade já existe na árvore.", "Aviso", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+      }
+    }
+    
+    /// <summary>
+    /// Busca uma cidade na árvore pelo nome.
+    /// </summary>
+    private void btnBuscarCidade_Click(object sender, EventArgs e)
+    {
+      string nomeCidade = txtNomeCidade.Text.Trim();
+      
+      if (string.IsNullOrEmpty(nomeCidade))
+      {
+        MessageBox.Show("Informe o nome da cidade para buscar.", "Aviso", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+        txtNomeCidade.Focus();
+        return;
+      }
+      
+      Cidade cidadeBusca = new Cidade(nomeCidade);
+      
+      if (arvore.Existe(cidadeBusca))
+      {
+        cidadeAtual = arvore.Atual.Info;
+        ExibirCidade(cidadeAtual);
+        MessageBox.Show("Cidade encontrada!", "Sucesso", MessageBoxButtons.OK, MessageBoxIcon.Information);
+      }
+      else
+      {
+        cidadeAtual = null;
+        MessageBox.Show("Cidade não encontrada.", "Aviso", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+      }
+    }
+    
+    /// <summary>
+    /// Altera os dados de uma cidade existente.
+    /// </summary>
+    private void btnAlterarCidade_Click(object sender, EventArgs e)
+    {
+      if (cidadeAtual == null)
+      {
+        MessageBox.Show("Busque uma cidade primeiro para alterar.", "Aviso", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+        return;
+      }
+      
+      // Atualiza as coordenadas da cidade atual
+      cidadeAtual.X = (double)udX.Value;
+      cidadeAtual.Y = (double)udY.Value;
+      
+      pnlArvore.Invalidate();
+      MessageBox.Show("Cidade alterada com sucesso!", "Sucesso", MessageBoxButtons.OK, MessageBoxIcon.Information);
+    }
+    
+    /// <summary>
+    /// Exclui uma cidade da árvore. Só permite exclusão se não houver ligações.
+    /// </summary>
+    private void btnExcluirCidade_Click(object sender, EventArgs e)
+    {
+      if (cidadeAtual == null)
+      {
+        MessageBox.Show("Busque uma cidade primeiro para excluir.", "Aviso", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+        return;
+      }
+      
+      // Verifica se a cidade possui ligações
+      if (cidadeAtual.Ligacoes.QuantosNos > 0)
+      {
+        MessageBox.Show("Não é possível excluir uma cidade que possui ligações. Remova as ligações primeiro.", "Aviso", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+        return;
+      }
+      
+      // Verifica se outras cidades possuem ligações para esta cidade
+      if (ExistemLigacoesParaCidade(cidadeAtual.Nome.Trim()))
+      {
+        MessageBox.Show("Não é possível excluir esta cidade pois outras cidades possuem ligações para ela. Remova as ligações primeiro.", "Aviso", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+        return;
+      }
+      
+      DialogResult resultado = MessageBox.Show($"Deseja realmente excluir a cidade '{cidadeAtual.Nome.Trim()}'?", "Confirmação", MessageBoxButtons.YesNo, MessageBoxIcon.Question);
+      
+      if (resultado == DialogResult.Yes)
+      {
+        if (arvore.Excluir(cidadeAtual))
+        {
+          MessageBox.Show("Cidade excluída com sucesso!", "Sucesso", MessageBoxButtons.OK, MessageBoxIcon.Information);
+          cidadeAtual = null;
+          LimparCamposCidade();
+          AtualizarComboBoxDestino();
+          pnlArvore.Invalidate();
+        }
+        else
+        {
+          MessageBox.Show("Erro ao excluir a cidade.", "Erro", MessageBoxButtons.OK, MessageBoxIcon.Error);
+        }
+      }
+    }
+    
+    /// <summary>
+    /// Verifica se existem ligações de outras cidades para a cidade especificada.
+    /// </summary>
+    private bool ExistemLigacoesParaCidade(string nomeCidade)
+    {
+      List<Cidade> cidades = new List<Cidade>();
+      arvore.VisitarEmOrdem(cidades);
+      
+      return cidades.Where(c => c.ExisteLigacao(nomeCidade)).Any();
+    }
+    
+    /// <summary>
+    /// Exibe os dados de uma cidade nos campos do formulário.
+    /// </summary>
+    private void ExibirCidade(Cidade cidade)
+    {
+      txtNomeCidade.Text = cidade.Nome.Trim();
+      udX.Value = (decimal)cidade.X;
+      udY.Value = (decimal)cidade.Y;
+      AtualizarDataGridLigacoes();
+    }
+    
+    /// <summary>
+    /// Limpa os campos de cidade no formulário.
+    /// </summary>
+    private void LimparCamposCidade()
+    {
+      txtNomeCidade.Text = "";
+      udX.Value = 0;
+      udY.Value = 0;
+      dgvLigacoes.Rows.Clear();
+    }
+    
+    /// <summary>
+    /// Atualiza o DataGridView de ligações com as ligações da cidade atual.
+    /// </summary>
+    private void AtualizarDataGridLigacoes()
+    {
+      dgvLigacoes.Rows.Clear();
+      
+      if (cidadeAtual == null)
+        return;
+      
+      var ligacoes = cidadeAtual.Ligacoes.Listar();
+      foreach (var ligacao in ligacoes)
+      {
+        dgvLigacoes.Rows.Add(ligacao.CidadeDestino, ligacao.Distancia);
+      }
+    }
+    
+    /// <summary>
+    /// Atualiza o ComboBox de destino com todas as cidades da árvore.
+    /// </summary>
+    private void AtualizarComboBoxDestino()
+    {
+      cbxCidadeDestino.Items.Clear();
+      
+      List<Cidade> cidades = new List<Cidade>();
+      arvore.VisitarEmOrdem(cidades);
+      
+      foreach (Cidade cidade in cidades)
+      {
+        cbxCidadeDestino.Items.Add(cidade.Nome.Trim());
+      }
+    }
+    
+    #endregion
+    
+    #region Manutenção de Ligações
+    
+    /// <summary>
+    /// Adiciona uma nova ligação à cidade atual.
+    /// </summary>
+    private void btnIncluirCaminho_Click(object sender, EventArgs e)
+    {
+      if (cidadeAtual == null)
+      {
+        MessageBox.Show("Busque ou inclua uma cidade primeiro.", "Aviso", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+        return;
+      }
+      
+      string cidadeDestino = txtNovoDestino.Text.Trim();
+      int distancia = (int)nudDistancia.Value;
+      
+      if (string.IsNullOrEmpty(cidadeDestino))
+      {
+        MessageBox.Show("Informe a cidade de destino.", "Aviso", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+        txtNovoDestino.Focus();
+        return;
+      }
+      
+      if (distancia <= 0)
+      {
+        MessageBox.Show("A distância deve ser maior que zero.", "Aviso", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+        nudDistancia.Focus();
+        return;
+      }
+      
+      // Verifica se a cidade de destino existe
+      Cidade cidadeDestinoBusca = new Cidade(cidadeDestino);
+      if (!arvore.Existe(cidadeDestinoBusca))
+      {
+        MessageBox.Show("A cidade de destino não existe.", "Aviso", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+        return;
+      }
+      
+      // Verifica se não está tentando criar ligação para a mesma cidade
+      if (cidadeDestino.Equals(cidadeAtual.Nome.Trim()))
+      {
+        MessageBox.Show("Não é possível criar uma ligação de uma cidade para ela mesma.", "Aviso", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+        return;
+      }
+      
+      if (cidadeAtual.AdicionarLigacao(arvore.Atual.Info.Nome.Trim(), distancia))
+      {
+        MessageBox.Show("Ligação adicionada com sucesso!", "Sucesso", MessageBoxButtons.OK, MessageBoxIcon.Information);
+        AtualizarDataGridLigacoes();
+        txtNovoDestino.Text = "";
+        nudDistancia.Value = 0;
+      }
+      else
+      {
+        MessageBox.Show("Esta ligação já existe.", "Aviso", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+      }
+    }
+    
+    /// <summary>
+    /// Remove a ligação selecionada da cidade atual.
+    /// </summary>
+    private void btnExcluirCaminho_Click(object sender, EventArgs e)
+    {
+      if (cidadeAtual == null)
+      {
+        MessageBox.Show("Busque ou inclua uma cidade primeiro.", "Aviso", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+        return;
+      }
+      
+      if (dgvLigacoes.SelectedRows.Count == 0)
+      {
+        MessageBox.Show("Selecione uma ligação para excluir.", "Aviso", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+        return;
+      }
+      
+      string cidadeDestino = dgvLigacoes.SelectedRows[0].Cells[0].Value?.ToString();
+      
+      if (string.IsNullOrEmpty(cidadeDestino))
+      {
+        MessageBox.Show("Selecione uma ligação válida.", "Aviso", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+        return;
+      }
+      
+      DialogResult resultado = MessageBox.Show($"Deseja realmente excluir a ligação para '{cidadeDestino}'?", "Confirmação", MessageBoxButtons.YesNo, MessageBoxIcon.Question);
+      
+      if (resultado == DialogResult.Yes)
+      {
+        if (cidadeAtual.RemoverLigacao(cidadeDestino))
+        {
+          MessageBox.Show("Ligação excluída com sucesso!", "Sucesso", MessageBoxButtons.OK, MessageBoxIcon.Information);
+          AtualizarDataGridLigacoes();
+        }
+        else
+        {
+          MessageBox.Show("Erro ao excluir a ligação.", "Erro", MessageBoxButtons.OK, MessageBoxIcon.Error);
+        }
+      }
+    }
+    
+    #endregion
   }
 }
