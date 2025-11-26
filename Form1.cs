@@ -334,12 +334,12 @@ namespace Proj4
     }
     
     /// <summary>
-    /// Atualiza o ComboBox de destino e origem com todas as cidades da árvore.
+    /// Atualiza os ComboBoxes de origem e destino com todas as cidades da árvore.
     /// </summary>
     private void AtualizarComboBoxDestino()
     {
-      cbxCidadeDestino.Items.Clear();
       cbxCidadeOrigem.Items.Clear();
+      cbxCidadeDestino.Items.Clear();
       
       List<Cidade> cidades = new List<Cidade>();
       arvore.VisitarEmOrdem(cidades);
@@ -347,8 +347,8 @@ namespace Proj4
       foreach (Cidade cidade in cidades)
       {
         string nomeCidade = cidade.Nome.Trim();
-        cbxCidadeDestino.Items.Add(nomeCidade);
         cbxCidadeOrigem.Items.Add(nomeCidade);
+        cbxCidadeDestino.Items.Add(nomeCidade);
       }
     }
     
@@ -514,8 +514,6 @@ namespace Proj4
       
       // Redesenha o mapa para destacar o caminho
       pbMapa.Invalidate();
-      
-      MessageBox.Show($"Caminho encontrado com {caminhoAtual.Caminho.Count} cidades e distância total de {caminhoAtual.DistanciaTotal} km.", "Sucesso", MessageBoxButtons.OK, MessageBoxIcon.Information);
     }
     
     /// <summary>
