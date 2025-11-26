@@ -418,6 +418,7 @@
       this.pbMapa.TabIndex = 0;
       this.pbMapa.TabStop = false;
       this.pbMapa.MouseClick += new System.Windows.Forms.MouseEventHandler(this.pbMapa_MouseClick);
+      this.pbMapa.Paint += new System.Windows.Forms.PaintEventHandler(this.pbMapa_Paint);
       // 
       // tpArvore
       // 
