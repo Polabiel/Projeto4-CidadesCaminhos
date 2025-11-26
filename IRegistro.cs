@@ -3,8 +3,8 @@
 // Disciplina: Estruturas de Dados - 2o DSNot 2025
 // ------------------------------------------------------------
 // Alunos:
-//   Gabriel da Silva Nascimento - RA: 24.01266-2
-//   Claudio Correa Gorza Filho - RA: 24.01214-0
+//   Andrew Douglas Nithack - RA: 23305
+//   Gabriel Oliveira dos Santos - RA: 23600
 // ============================================================
 
 using System.IO;

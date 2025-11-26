@@ -10,8 +10,8 @@ Aplicação Windows Forms para cadastro e manutenção de cidades e caminhos, de
 
 | Nome | RA |
 |------|-----|
-| Gabriel da Silva Nascimento | 24.01266-2 |
-| Claudio Correa Gorza Filho | 24.01214-0 |
+| Andrew Douglas Nithack | 23305 |
+| Gabriel Oliveira dos Santos | 23600 |
 
 ## 📋 Descrição do Projeto
 
@@ -120,7 +120,7 @@ Para compactar o projeto conforme o padrão solicitado:
 3. Compacte a pasta do projeto em um arquivo ZIP
 4. Renomeie para o padrão: `raMenor_raMaior_Proj4ED.zip`
 
-Exemplo: `24012140_24012662_Proj4ED.zip`
+Exemplo: `23305_23600_Proj4ED.zip`
 
 ## 📄 Licença
 
