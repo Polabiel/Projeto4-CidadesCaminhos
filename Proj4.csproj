@@ -49,6 +49,7 @@
     <Compile Include="ArquivoHelper.cs" />
     <Compile Include="Arvore.cs" />
     <Compile Include="Cidade.cs" />
+    <Compile Include="Dijkstra.cs" />
     <Compile Include="FilaLista.cs" />
     <Compile Include="Form1.cs">
       <SubType>Form</SubType>

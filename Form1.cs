@@ -20,6 +20,9 @@ namespace Proj4
     // Cidade atualmente selecionada/carregada no formulário
     private Cidade cidadeAtual = null;
     
+    // Resultado da busca do menor caminho (Dijkstra)
+    private ResultadoDijkstra caminhoAtual = null;
+    
     public Form1()
     {
       InitializeComponent();
@@ -331,10 +334,11 @@ namespace Proj4
     }
     
     /// <summary>
-    /// Atualiza o ComboBox de destino com todas as cidades da árvore.
+    /// Atualiza os ComboBoxes de origem e destino com todas as cidades da árvore.
     /// </summary>
     private void AtualizarComboBoxDestino()
     {
+      cbxCidadeOrigem.Items.Clear();
       cbxCidadeDestino.Items.Clear();
       
       List<Cidade> cidades = new List<Cidade>();
@@ -342,7 +346,9 @@ namespace Proj4
       
       foreach (Cidade cidade in cidades)
       {
-        cbxCidadeDestino.Items.Add(cidade.Nome.Trim());
+        string nomeCidade = cidade.Nome.Trim();
+        cbxCidadeOrigem.Items.Add(nomeCidade);
+        cbxCidadeDestino.Items.Add(nomeCidade);
       }
     }
     
@@ -453,14 +459,124 @@ namespace Proj4
     
     #endregion
     
+    #region Busca de Menor Caminho (Dijkstra)
+    
+    /// <summary>
+    /// Busca o menor caminho entre a cidade de origem e a cidade de destino.
+    /// </summary>
+    private void btnBuscarCaminho_Click(object sender, EventArgs e)
+    {
+      // Limpa resultados anteriores
+      dgvRotas.Rows.Clear();
+      lbDistanciaTotal.Text = "Distância total: ";
+      caminhoAtual = null;
+      
+      // Valida seleção das cidades
+      if (cbxCidadeOrigem.SelectedItem == null || string.IsNullOrEmpty(cbxCidadeOrigem.SelectedItem.ToString()))
+      {
+        MessageBox.Show("Selecione a cidade de origem.", "Aviso", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+        cbxCidadeOrigem.Focus();
+        return;
+      }
+      
+      if (cbxCidadeDestino.SelectedItem == null || string.IsNullOrEmpty(cbxCidadeDestino.SelectedItem.ToString()))
+      {
+        MessageBox.Show("Selecione a cidade de destino.", "Aviso", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+        cbxCidadeDestino.Focus();
+        return;
+      }
+      
+      string nomeOrigem = cbxCidadeOrigem.SelectedItem.ToString();
+      string nomeDestino = cbxCidadeDestino.SelectedItem.ToString();
+      
+      // Verifica se origem e destino são iguais
+      if (nomeOrigem == nomeDestino)
+      {
+        MessageBox.Show("A cidade de origem e destino devem ser diferentes.", "Aviso", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+        return;
+      }
+      
+      // Executa o algoritmo de Dijkstra
+      caminhoAtual = Dijkstra.BuscarMenorCaminho(arvore, nomeOrigem, nomeDestino);
+      
+      if (!caminhoAtual.CaminhoEncontrado)
+      {
+        MessageBox.Show($"Não existe caminho entre {nomeOrigem} e {nomeDestino}.", "Caminho Inexistente", MessageBoxButtons.OK, MessageBoxIcon.Information);
+        pbMapa.Invalidate();
+        return;
+      }
+      
+      // Exibe o caminho encontrado no DataGridView
+      ExibirCaminhoNoGrid(caminhoAtual);
+      
+      // Atualiza a distância total
+      lbDistanciaTotal.Text = $"Distância total: {caminhoAtual.DistanciaTotal} km";
+      
+      // Redesenha o mapa para destacar o caminho
+      pbMapa.Invalidate();
+    }
+    
+    /// <summary>
+    /// Exibe o caminho no DataGridView dgvRotas.
+    /// </summary>
+    private void ExibirCaminhoNoGrid(ResultadoDijkstra resultado)
+    {
+      dgvRotas.Rows.Clear();
+      
+      if (!resultado.CaminhoEncontrado)
+        return;
+      
+      // Obtém todas as cidades para calcular distâncias parciais
+      Dictionary<string, Cidade> cidadesPorNome = new Dictionary<string, Cidade>();
+      List<Cidade> todasCidades = new List<Cidade>();
+      arvore.VisitarEmOrdem(todasCidades);
+      foreach (Cidade c in todasCidades)
+      {
+        cidadesPorNome[c.Nome.Trim()] = c;
+      }
+      
+      // Adiciona cada cidade do caminho com a distância acumulada
+      int distanciaAcumulada = 0;
+      
+      for (int i = 0; i < resultado.Caminho.Count; i++)
+      {
+        string nomeCidade = resultado.Caminho[i];
+        
+        // Calcula a distância do trecho anterior (se não for a primeira cidade)
+        if (i > 0)
+        {
+          string cidadeAnterior = resultado.Caminho[i - 1];
+          if (cidadesPorNome.TryGetValue(cidadeAnterior, out Cidade cidadeOrigem))
+          {
+            var ligacoes = cidadeOrigem.Ligacoes.Listar();
+            foreach (var ligacao in ligacoes)
+            {
+              if (ligacao.CidadeDestino.Trim() == nomeCidade)
+              {
+                distanciaAcumulada += ligacao.Distancia;
+                break;
+              }
+            }
+          }
+        }
+        
+        dgvRotas.Rows.Add(nomeCidade, distanciaAcumulada);
+      }
+    }
+    
+    #endregion
+    
     #region Desenho do Mapa
     
     // Recursos de desenho reutilizáveis para o mapa
     private readonly Pen penLigacao = new Pen(Color.Blue, 1);
+    private readonly Pen penCaminho = new Pen(Color.Green, 3);
     private readonly SolidBrush brushCidade = new SolidBrush(Color.Red);
+    private readonly SolidBrush brushCidadeCaminho = new SolidBrush(Color.Green);
     private readonly SolidBrush brushTexto = new SolidBrush(Color.Black);
     private readonly Font fontNome = new Font("Arial", 7, FontStyle.Regular);
     private const int raioCidade = 5;
+    private const int raioCidadeCaminho = 7;
     
     /// <summary>
     /// Evento Paint do PictureBox do mapa - desenha cidades e ligações.
@@ -472,6 +588,7 @@ namespace Proj4
     
     /// <summary>
     /// Desenha o mapa com todas as cidades e suas ligações.
+    /// Destaca o caminho encontrado pelo algoritmo de Dijkstra em verde.
     /// </summary>
     private void DesenharMapa(Graphics g)
     {
@@ -493,7 +610,17 @@ namespace Proj4
         cidadesPorNome[nomeNormalizado] = cidade;
       }
       
-      // Primeiro, desenha todas as ligações (linhas)
+      // Cria um conjunto com as cidades que fazem parte do caminho
+      HashSet<string> cidadesNoCaminho = new HashSet<string>();
+      if (caminhoAtual != null && caminhoAtual.CaminhoEncontrado)
+      {
+        foreach (string nome in caminhoAtual.Caminho)
+        {
+          cidadesNoCaminho.Add(nome);
+        }
+      }
+      
+      // Primeiro, desenha todas as ligações normais (linhas azuis)
       foreach (Cidade cidade in cidades)
       {
         int x1 = (int)(cidade.X * pbMapa.Width);
@@ -513,6 +640,27 @@ namespace Proj4
         }
       }
       
+      // Desenha o caminho destacado (linhas verdes mais grossas)
+      if (caminhoAtual != null && caminhoAtual.CaminhoEncontrado)
+      {
+        for (int i = 0; i < caminhoAtual.Caminho.Count - 1; i++)
+        {
+          string nomeOrigem = caminhoAtual.Caminho[i];
+          string nomeDestino = caminhoAtual.Caminho[i + 1];
+          
+          if (cidadesPorNome.TryGetValue(nomeOrigem, out Cidade cidadeOrigem) &&
+              cidadesPorNome.TryGetValue(nomeDestino, out Cidade cidadeDestinoObj))
+          {
+            int x1 = (int)(cidadeOrigem.X * pbMapa.Width);
+            int y1 = (int)(cidadeOrigem.Y * pbMapa.Height);
+            int x2 = (int)(cidadeDestinoObj.X * pbMapa.Width);
+            int y2 = (int)(cidadeDestinoObj.Y * pbMapa.Height);
+            
+            g.DrawLine(penCaminho, x1, y1, x2, y2);
+          }
+        }
+      }
+      
       // Depois, desenha todas as cidades (círculos) e nomes
       foreach (Cidade cidade in cidades)
       {
@@ -520,8 +668,19 @@ namespace Proj4
         int x = (int)(cidade.X * pbMapa.Width);
         int y = (int)(cidade.Y * pbMapa.Height);
         
-        // Desenha o círculo da cidade
-        g.FillEllipse(brushCidade, x - raioCidade, y - raioCidade, raioCidade * 2, raioCidade * 2);
+        // Verifica se a cidade faz parte do caminho
+        bool fazParteDoCaminho = cidadesNoCaminho.Contains(nomeCidade);
+        
+        if (fazParteDoCaminho)
+        {
+          // Desenha o círculo da cidade em verde (maior) para cidades no caminho
+          g.FillEllipse(brushCidadeCaminho, x - raioCidadeCaminho, y - raioCidadeCaminho, raioCidadeCaminho * 2, raioCidadeCaminho * 2);
+        }
+        else
+        {
+          // Desenha o círculo da cidade em vermelho
+          g.FillEllipse(brushCidade, x - raioCidade, y - raioCidade, raioCidade * 2, raioCidade * 2);
+        }
         
         // Desenha o nome da cidade próximo ao círculo
         g.DrawString(nomeCidade, fontNome, brushTexto, x + raioCidade + 2, y - raioCidade);

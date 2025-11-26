@@ -38,6 +38,8 @@
       this.btnBuscarCaminho = new System.Windows.Forms.Button();
       this.cbxCidadeDestino = new System.Windows.Forms.ComboBox();
       this.label6 = new System.Windows.Forms.Label();
+      this.cbxCidadeOrigem = new System.Windows.Forms.ComboBox();
+      this.label7 = new System.Windows.Forms.Label();
       this.groupBox1 = new System.Windows.Forms.GroupBox();
       this.groupBox2 = new System.Windows.Forms.GroupBox();
       this.btnExcluirCaminho = new System.Windows.Forms.Button();
@@ -116,12 +118,32 @@
       this.groupBox3.Controls.Add(this.btnBuscarCaminho);
       this.groupBox3.Controls.Add(this.cbxCidadeDestino);
       this.groupBox3.Controls.Add(this.label6);
+      this.groupBox3.Controls.Add(this.cbxCidadeOrigem);
+      this.groupBox3.Controls.Add(this.label7);
       this.groupBox3.Location = new System.Drawing.Point(8, 453);
       this.groupBox3.Name = "groupBox3";
       this.groupBox3.Size = new System.Drawing.Size(419, 374);
       this.groupBox3.TabIndex = 2;
       this.groupBox3.TabStop = false;
       this.groupBox3.Text = "Busca de rotas";
+      // 
+      // label7
+      // 
+      this.label7.AutoSize = true;
+      this.label7.Location = new System.Drawing.Point(14, 22);
+      this.label7.Name = "label7";
+      this.label7.Size = new System.Drawing.Size(120, 18);
+      this.label7.TabIndex = 5;
+      this.label7.Text = "Cidade de Origem";
+      // 
+      // cbxCidadeOrigem
+      // 
+      this.cbxCidadeOrigem.FormattingEnabled = true;
+      this.cbxCidadeOrigem.Location = new System.Drawing.Point(11, 42);
+      this.cbxCidadeOrigem.Name = "cbxCidadeOrigem";
+      this.cbxCidadeOrigem.Size = new System.Drawing.Size(185, 26);
+      this.cbxCidadeOrigem.TabIndex = 6;
+      //
       // 
       // lbDistanciaTotal
       // 
@@ -141,9 +163,9 @@
       this.dgvRotas.Columns.AddRange(new System.Windows.Forms.DataGridViewColumn[] {
             this.dataGridViewTextBoxColumn1,
             this.dataGridViewTextBoxColumn2});
-      this.dgvRotas.Location = new System.Drawing.Point(11, 100);
+      this.dgvRotas.Location = new System.Drawing.Point(11, 132);
       this.dgvRotas.Name = "dgvRotas";
-      this.dgvRotas.Size = new System.Drawing.Size(347, 242);
+      this.dgvRotas.Size = new System.Drawing.Size(347, 210);
       this.dgvRotas.TabIndex = 3;
       // 
       // dataGridViewTextBoxColumn1
@@ -160,25 +182,26 @@
       // 
       // btnBuscarCaminho
       // 
-      this.btnBuscarCaminho.Location = new System.Drawing.Point(271, 52);
+      this.btnBuscarCaminho.Location = new System.Drawing.Point(271, 85);
       this.btnBuscarCaminho.Name = "btnBuscarCaminho";
       this.btnBuscarCaminho.Size = new System.Drawing.Size(132, 32);
       this.btnBuscarCaminho.TabIndex = 2;
       this.btnBuscarCaminho.Text = "Buscar caminhos";
       this.btnBuscarCaminho.UseVisualStyleBackColor = true;
+      this.btnBuscarCaminho.Click += new System.EventHandler(this.btnBuscarCaminho_Click);
       // 
       // cbxCidadeDestino
       // 
       this.cbxCidadeDestino.FormattingEnabled = true;
-      this.cbxCidadeDestino.Location = new System.Drawing.Point(11, 56);
+      this.cbxCidadeDestino.Location = new System.Drawing.Point(203, 42);
       this.cbxCidadeDestino.Name = "cbxCidadeDestino";
-      this.cbxCidadeDestino.Size = new System.Drawing.Size(243, 26);
+      this.cbxCidadeDestino.Size = new System.Drawing.Size(185, 26);
       this.cbxCidadeDestino.TabIndex = 1;
       // 
       // label6
       // 
       this.label6.AutoSize = true;
-      this.label6.Location = new System.Drawing.Point(14, 34);
+      this.label6.Location = new System.Drawing.Point(206, 22);
       this.label6.Name = "label6";
       this.label6.Size = new System.Drawing.Size(129, 18);
       this.label6.TabIndex = 0;
@@ -510,6 +533,8 @@
     private System.Windows.Forms.DataGridViewTextBoxColumn dataGridViewTextBoxColumn2;
     private System.Windows.Forms.Panel pnlArvore;
     private System.Windows.Forms.OpenFileDialog dlgAbrir;
+    private System.Windows.Forms.ComboBox cbxCidadeOrigem;
+    private System.Windows.Forms.Label label7;
   }
 }
 
