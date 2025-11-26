@@ -14,7 +14,7 @@ namespace Proj4
     Arvore<Cidade>  arvore = new Arvore<Cidade>();
     
     // Caminhos dos arquivos de dados
-    private readonly string arquivoCidades = Path.Combine(Application.StartupPath, "Dados", "cidades.dat");
+    private readonly string arquivoCidades = Path.Combine(Application.StartupPath, "Dados", "CidadesSaoPaulo.dat");
     private readonly string arquivoLigacoes = Path.Combine(Application.StartupPath, "Dados", "GrafoOnibusSaoPaulo.txt");
     
     // Cidade atualmente selecionada/carregada no formulário
