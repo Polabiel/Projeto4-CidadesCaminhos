@@ -1,6 +1,7 @@
 ﻿using AgendaAlfabetica;
 using System;
 using System.IO;
+using System.Text;
 using System.Windows.Forms;
 
 namespace Proj4
@@ -13,6 +14,9 @@ namespace Proj4
 
     const int tamanhoNome = 25;
     const int tamanhoRegistro = tamanhoNome + (2 * sizeof(double));
+    
+    // Encoding para compatibilidade com arquivos existentes (Windows-1252/Latin1)
+    private static readonly Encoding encodingArquivo = Encoding.GetEncoding(1252);
 
     public string Nome
     {
@@ -110,12 +114,19 @@ namespace Proj4
 
     public void LerRegistro(BinaryReader arquivo, long qualRegistro)
     {
-
+      arquivo.BaseStream.Seek(qualRegistro * tamanhoRegistro, SeekOrigin.Begin);
+      byte[] nomeBytes = arquivo.ReadBytes(tamanhoNome);
+      this.nome = encodingArquivo.GetString(nomeBytes);
+      this.x = arquivo.ReadDouble();
+      this.y = arquivo.ReadDouble();
     }
 
     public void GravarRegistro(BinaryWriter arquivo)
     {
-
+      byte[] nomeBytes = encodingArquivo.GetBytes(Nome.PadRight(tamanhoNome, ' ').Substring(0, tamanhoNome));
+      arquivo.Write(nomeBytes);
+      arquivo.Write(x);
+      arquivo.Write(y);
     }
   }
 
