@@ -388,7 +388,7 @@ namespace Proj4
         return;
       }
       
-      if (cidadeAtual.AdicionarLigacao(cidadeDestino, distancia))
+      if (cidadeAtual.AdicionarLigacao(arvore.Atual.Info.Nome.Trim(), distancia))
       {
         MessageBox.Show("Ligação adicionada com sucesso!", "Sucesso", MessageBoxButtons.OK, MessageBoxIcon.Information);
         AtualizarDataGridLigacoes();
