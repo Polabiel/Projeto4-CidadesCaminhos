@@ -130,24 +130,6 @@ namespace Proj4
     }
     
     /// <summary>
-    /// Evento Click do pbMapa - define coordenadas proporcionais ao clicar no mapa.
-    /// </summary>
-    private void pbMapa_Click(object sender, EventArgs e)
-    {
-      MouseEventArgs me = e as MouseEventArgs;
-      if (me != null)
-      {
-        // Calcula coordenadas proporcionais (0 a 1)
-        double xProporcional = (double)me.X / pbMapa.Width;
-        double yProporcional = (double)me.Y / pbMapa.Height;
-        
-        // Atualiza os campos de coordenadas
-        udX.Value = (decimal)xProporcional;
-        udY.Value = (decimal)yProporcional;
-      }
-    }
-    
-    /// <summary>
     /// Evento Click do pbMapa usando MouseClick para coordenadas.
     /// </summary>
     private void pbMapa_MouseClick(object sender, MouseEventArgs e)
