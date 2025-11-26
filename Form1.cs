@@ -178,6 +178,7 @@ namespace Proj4
         AtualizarComboBoxDestino();
         AtualizarDataGridLigacoes();
         pnlArvore.Invalidate();
+        pbMapa.Invalidate();
       }
       else
       {
@@ -230,6 +231,7 @@ namespace Proj4
       cidadeAtual.Y = (double)udY.Value;
       
       pnlArvore.Invalidate();
+      pbMapa.Invalidate();
       MessageBox.Show("Cidade alterada com sucesso!", "Sucesso", MessageBoxButtons.OK, MessageBoxIcon.Information);
     }
     
@@ -269,6 +271,7 @@ namespace Proj4
           LimparCamposCidade();
           AtualizarComboBoxDestino();
           pnlArvore.Invalidate();
+          pbMapa.Invalidate();
         }
         else
         {
@@ -396,6 +399,7 @@ namespace Proj4
         AtualizarDataGridLigacoes();
         txtNovoDestino.Text = "";
         nudDistancia.Value = 0;
+        pbMapa.Invalidate();
       }
       else
       {
@@ -436,11 +440,89 @@ namespace Proj4
         {
           MessageBox.Show("Ligação excluída com sucesso!", "Sucesso", MessageBoxButtons.OK, MessageBoxIcon.Information);
           AtualizarDataGridLigacoes();
+          pbMapa.Invalidate();
         }
         else
         {
           MessageBox.Show("Erro ao excluir a ligação.", "Erro", MessageBoxButtons.OK, MessageBoxIcon.Error);
         }
+      }
+    }
+    
+    #endregion
+    
+    #region Desenho do Mapa
+    
+    // Recursos de desenho reutilizáveis para o mapa
+    private readonly Pen penLigacao = new Pen(Color.Blue, 1);
+    private readonly SolidBrush brushCidade = new SolidBrush(Color.Red);
+    private readonly SolidBrush brushTexto = new SolidBrush(Color.Black);
+    private readonly Font fontNome = new Font("Arial", 7, FontStyle.Regular);
+    private const int raioCidade = 5;
+    
+    /// <summary>
+    /// Evento Paint do PictureBox do mapa - desenha cidades e ligações.
+    /// </summary>
+    private void pbMapa_Paint(object sender, PaintEventArgs e)
+    {
+      DesenharMapa(e.Graphics);
+    }
+    
+    /// <summary>
+    /// Desenha o mapa com todas as cidades e suas ligações.
+    /// </summary>
+    private void DesenharMapa(Graphics g)
+    {
+      if (pbMapa.Width <= 0 || pbMapa.Height <= 0)
+        return;
+      
+      // Obtém todas as cidades da árvore
+      List<Cidade> cidades = new List<Cidade>();
+      arvore.VisitarEmOrdem(cidades);
+      
+      if (cidades.Count == 0)
+        return;
+      
+      // Cria um dicionário para acesso rápido às cidades por nome (normalizado)
+      Dictionary<string, Cidade> cidadesPorNome = new Dictionary<string, Cidade>();
+      foreach (Cidade cidade in cidades)
+      {
+        string nomeNormalizado = cidade.Nome.Trim();
+        cidadesPorNome[nomeNormalizado] = cidade;
+      }
+      
+      // Primeiro, desenha todas as ligações (linhas)
+      foreach (Cidade cidade in cidades)
+      {
+        int x1 = (int)(cidade.X * pbMapa.Width);
+        int y1 = (int)(cidade.Y * pbMapa.Height);
+        
+        var ligacoes = cidade.Ligacoes.Listar();
+        foreach (var ligacao in ligacoes)
+        {
+          string nomeDestino = ligacao.CidadeDestino.Trim();
+          if (cidadesPorNome.TryGetValue(nomeDestino, out Cidade cidadeDestino))
+          {
+            int x2 = (int)(cidadeDestino.X * pbMapa.Width);
+            int y2 = (int)(cidadeDestino.Y * pbMapa.Height);
+            
+            g.DrawLine(penLigacao, x1, y1, x2, y2);
+          }
+        }
+      }
+      
+      // Depois, desenha todas as cidades (círculos) e nomes
+      foreach (Cidade cidade in cidades)
+      {
+        string nomeCidade = cidade.Nome.Trim();
+        int x = (int)(cidade.X * pbMapa.Width);
+        int y = (int)(cidade.Y * pbMapa.Height);
+        
+        // Desenha o círculo da cidade
+        g.FillEllipse(brushCidade, x - raioCidade, y - raioCidade, raioCidade * 2, raioCidade * 2);
+        
+        // Desenha o nome da cidade próximo ao círculo
+        g.DrawString(nomeCidade, fontNome, brushTexto, x + raioCidade + 2, y - raioCidade);
       }
     }
     
