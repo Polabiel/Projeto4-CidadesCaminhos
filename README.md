@@ -4,7 +4,7 @@ Aplicação Windows Forms para cadastro e manutenção de cidades e caminhos, de
 
 ## 📚 Disciplina
 
-**Estruturas de Dados** - 2º DSNot 2025
+**Estruturas de Dados** - 2o DSNot 2025
 
 ## 👥 Autores
 
