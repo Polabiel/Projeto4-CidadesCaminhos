@@ -8,6 +8,7 @@
 // ============================================================
 
 using System;
+using System.Collections.Generic;
 using System.IO;
 using AgendaAlfabetica;
 
@@ -37,12 +38,20 @@ namespace Proj4
             
             if (int.TryParse(partes[2].Trim(), out distancia))
             {
-
-              Cidade cidadeBusca = new Cidade(nomeOrigem);
-              if (arvore.Existe(cidadeBusca))
+              // Adiciona ligação A→B
+              Cidade cidadeBuscaOrigem = new Cidade(nomeOrigem);
+              if (arvore.Existe(cidadeBuscaOrigem))
               {
                 Cidade cidadeOrigem = arvore.Atual.Info;
                 cidadeOrigem.AdicionarLigacao(nomeDestino, distancia);
+              }
+              
+              // Adiciona ligação recíproca B→A (as ligações são bidirecionais conforme documentação)
+              Cidade cidadeBuscaDestino = new Cidade(nomeDestino);
+              if (arvore.Existe(cidadeBuscaDestino))
+              {
+                Cidade cidadeDestino = arvore.Atual.Info;
+                cidadeDestino.AdicionarLigacao(nomeOrigem, distancia);
               }
             }
           }
@@ -52,29 +61,47 @@ namespace Proj4
 
     public static void GravarArquivoLigacoes(string nomeArquivo, Arvore<Cidade> arvore)
     {
+      // Usamos um HashSet para evitar gravar ligações duplicadas (A→B e B→A são a mesma ligação)
+      HashSet<string> ligacoesGravadas = new HashSet<string>();
+      
       using (StreamWriter writer = new StreamWriter(nomeArquivo, false))
       {
-        GravarLigacoesRecursivo(arvore.Raiz, writer);
+        GravarLigacoesRecursivo(arvore.Raiz, writer, ligacoesGravadas);
       }
     }
-    private static void GravarLigacoesRecursivo(NoArvore<Cidade> no, StreamWriter writer)
+    private static void GravarLigacoesRecursivo(NoArvore<Cidade> no, StreamWriter writer, HashSet<string> ligacoesGravadas)
     {
       if (no == null)
         return;
 
-      GravarLigacoesRecursivo(no.Esq, writer);
+      GravarLigacoesRecursivo(no.Esq, writer, ligacoesGravadas);
 
       Cidade cidade = no.Info;
+      string nomeOrigem = cidade.Nome.Trim();
       ListaSimples<Ligacao> ligacoes = cidade.Ligacoes;
       
       ligacoes.IniciarPercursoSequencial();
       while (ligacoes.PodePercorrer())
       {
         Ligacao ligacao = ligacoes.Atual.Info;
-        writer.WriteLine($"{cidade.Nome.Trim()};{ligacao.CidadeDestino};{ligacao.Distancia}");
+        string nomeDestino = ligacao.CidadeDestino.Trim();
+        
+        // Cria uma chave única para a ligação (ordem alfabética para garantir unicidade)
+        string chave;
+        if (string.Compare(nomeOrigem, nomeDestino, StringComparison.OrdinalIgnoreCase) < 0)
+          chave = $"{nomeOrigem.ToUpperInvariant()}|{nomeDestino.ToUpperInvariant()}";
+        else
+          chave = $"{nomeDestino.ToUpperInvariant()}|{nomeOrigem.ToUpperInvariant()}";
+        
+        // Só grava se ainda não foi gravada (evita duplicatas de ligações bidirecionais)
+        if (!ligacoesGravadas.Contains(chave))
+        {
+          writer.WriteLine($"{nomeOrigem};{nomeDestino};{ligacao.Distancia}");
+          ligacoesGravadas.Add(chave);
+        }
       }
 
-      GravarLigacoesRecursivo(no.Dir, writer);
+      GravarLigacoesRecursivo(no.Dir, writer, ligacoesGravadas);
     }
   }
 }
