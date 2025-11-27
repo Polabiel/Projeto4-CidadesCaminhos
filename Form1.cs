@@ -64,21 +64,34 @@ namespace Proj4
     {
       try
       {
-        // Lê o arquivo binário de cidades para a árvore AVL
-        if (File.Exists(arquivoCidades))
-        {
-          arvore.LerArquivoDeRegistros(arquivoCidades);
-        }
+        string cidades = ObtendoCaminhoArquivo("CidadesSaoPaulo.dat");
+        string ligacoes = ObtendoCaminhoArquivo("GrafoOnibusSaoPaulo.txt");
         
-        // Lê o arquivo texto de ligações e adiciona às cidades
-        if (File.Exists(arquivoLigacoes))
+        System.Diagnostics.Debug.WriteLine(">>> CARREGANDO DADOS <<<");
+        System.Diagnostics.Debug.WriteLine($"Cidades: {cidades}");
+        System.Diagnostics.Debug.WriteLine($"Ligações: {ligacoes}\n");
+        
+        if (File.Exists(cidades))
         {
-          ArquivoHelper.LerArquivoLigacoes(arquivoLigacoes, arvore);
+          System.Diagnostics.Debug.WriteLine("✓ Carregando cidades...");
+          arvore.LerArquivoDeRegistros(cidades);
+          System.Diagnostics.Debug.WriteLine("✓ OK!\n");
         }
+        else
+          System.Diagnostics.Debug.WriteLine("✗ Cidades não encontrado!\n");
+        
+        if (File.Exists(ligacoes))
+        {
+          System.Diagnostics.Debug.WriteLine("✓ Carregando ligações...");
+          ArquivoHelper.LerArquivoLigacoes(ligacoes, arvore);
+          System.Diagnostics.Debug.WriteLine("✓ OK!\n");
+        }
+        else
+          System.Diagnostics.Debug.WriteLine("✗ Ligações não encontrado!\n");
       }
       catch (Exception ex)
       {
-        MessageBox.Show($"Erro ao carregar dados: {ex.Message}", "Erro", MessageBoxButtons.OK, MessageBoxIcon.Error);
+        MessageBox.Show($"Erro: {ex.Message}", "Erro", MessageBoxButtons.OK, MessageBoxIcon.Error);
       }
     }
     
@@ -89,22 +102,31 @@ namespace Proj4
     {
       try
       {
-        // Garante que o diretório Dados existe
-        string diretorioDados = Path.GetDirectoryName(arquivoCidades);
-        if (!Directory.Exists(diretorioDados))
+        string cidades = ObtendoCaminhoArquivo("CidadesSaoPaulo.dat");
+        string ligacoes = ObtendoCaminhoArquivo("GrafoOnibusSaoPaulo.txt");
+        
+        System.Diagnostics.Debug.WriteLine("\n>>> SALVANDO DADOS <<<");
+        System.Diagnostics.Debug.WriteLine($"Cidades: {cidades}");
+        System.Diagnostics.Debug.WriteLine($"Ligações: {ligacoes}\n");
+        
+        string dir = Path.GetDirectoryName(cidades);
+        if (!Directory.Exists(dir))
         {
-          Directory.CreateDirectory(diretorioDados);
+          Directory.CreateDirectory(dir);
+          System.Diagnostics.Debug.WriteLine($"✓ Diretório criado\n");
         }
         
-        // Grava o arquivo binário de cidades (árvore AVL em ordem)
-        arvore.GravarArquivoDeRegistros(arquivoCidades);
+        System.Diagnostics.Debug.WriteLine("✓ Gravando cidades...");
+        arvore.GravarArquivoDeRegistros(cidades);
+        System.Diagnostics.Debug.WriteLine("✓ OK!");
         
-        // Grava o arquivo texto de ligações
-        ArquivoHelper.GravarArquivoLigacoes(arquivoLigacoes, arvore);
+        System.Diagnostics.Debug.WriteLine("✓ Gravando ligações...");
+        ArquivoHelper.GravarArquivoLigacoes(ligacoes, arvore);
+        System.Diagnostics.Debug.WriteLine("✓ OK!\n");
       }
       catch (Exception ex)
       {
-        MessageBox.Show($"Erro ao salvar dados: {ex.Message}", "Erro", MessageBoxButtons.OK, MessageBoxIcon.Error);
+        MessageBox.Show($"Erro: {ex.Message}", "Erro", MessageBoxButtons.OK, MessageBoxIcon.Error);
       }
     }
     
@@ -767,6 +789,44 @@ namespace Proj4
         // Desenha o nome da cidade próximo ao círculo
         g.DrawString(nomeCidade, fontNome, brushTexto, x + raioCidade + 2, y - raioCidade);
       }
+    }
+    
+    /// <summary>
+    /// Obtém o caminho correto para um arquivo, procurando em múltiplas localizações.
+    /// PRIORIDADE: Dados/ (raiz) → bin\Debug\Dados → AppDomain
+    /// </summary>
+    private string ObtendoCaminhoArquivo(string nomeArquivo)
+    {
+      List<string> caminhos = new List<string>();
+      
+      // 1. PRIORIDADE: Subir até encontrar Dados/ na raiz
+      DirectoryInfo dir = new DirectoryInfo(AppDomain.CurrentDomain.BaseDirectory);
+      for (int i = 0; i < 3 && dir.Parent != null; i++)
+      {
+        dir = dir.Parent;
+        caminhos.Add(Path.Combine(dir.FullName, "Dados", nomeArquivo));
+      }
+      
+      // 2. Diretório de execução (bin\Debug ou bin\Release)
+      caminhos.Add(Path.Combine(Application.StartupPath, "Dados", nomeArquivo));
+      
+      // 3. AppDomain
+      caminhos.Add(Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Dados", nomeArquivo));
+      
+      System.Diagnostics.Debug.WriteLine($"\n=== PROCURANDO: {nomeArquivo} ===");
+      foreach (var c in caminhos)
+      {
+        bool existe = File.Exists(c);
+        System.Diagnostics.Debug.WriteLine($"{(existe ? "[✓]" : "[✗]")} {c}");
+        if (existe)
+        {
+          System.Diagnostics.Debug.WriteLine($"[★ USANDO]\n");
+          return c;
+        }
+      }
+      
+      System.Diagnostics.Debug.WriteLine($"[⚠ PADRÃO]\n");
+      return caminhos[0];
     }
     
     #endregion

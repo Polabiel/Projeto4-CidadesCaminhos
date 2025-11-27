@@ -78,6 +78,8 @@
       <DependentUpon>Resources.resx</DependentUpon>
       <DesignTime>True</DesignTime>
     </Compile>
+    <None Include="DEBUG_GUIDE.md" />
+    <None Include="diagnostico_arquivos.bat" />
     <None Include="Properties\Settings.settings">
       <Generator>SettingsSingleFileGenerator</Generator>
       <LastGenOutput>Settings.Designer.cs</LastGenOutput>
@@ -87,6 +89,9 @@
       <DependentUpon>Settings.settings</DependentUpon>
       <DesignTimeSharedInput>True</DesignTimeSharedInput>
     </Compile>
+    <None Include="RESUMO_EXECUTI VO.md" />
+    <None Include="SOLUCAO_ARQUIVOS.md" />
+    <None Include="TESTE_INSTRUCOES.md" />
   </ItemGroup>
   <ItemGroup>
     <None Include="App.config" />
