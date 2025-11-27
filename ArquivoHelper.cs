@@ -46,7 +46,7 @@ namespace Proj4
                 cidadeOrigem.AdicionarLigacao(nomeDestino, distancia);
               }
               
-              // Adiciona ligação recíproca B→A (as ligações são bidirecionais conforme documentação)
+              // Adiciona ligação recíproca B→A
               Cidade cidadeBuscaDestino = new Cidade(nomeDestino);
               if (arvore.Existe(cidadeBuscaDestino))
               {
@@ -86,14 +86,14 @@ namespace Proj4
         Ligacao ligacao = ligacoes.Atual.Info;
         string nomeDestino = ligacao.CidadeDestino.Trim();
         
-        // Cria uma chave única para a ligação (ordem alfabética para garantir unicidade)
+        // Cria uma chave única para a ligação
         string chave;
         if (string.Compare(nomeOrigem, nomeDestino, StringComparison.OrdinalIgnoreCase) < 0)
           chave = $"{nomeOrigem.ToUpperInvariant()}|{nomeDestino.ToUpperInvariant()}";
         else
           chave = $"{nomeDestino.ToUpperInvariant()}|{nomeOrigem.ToUpperInvariant()}";
         
-        // Só grava se ainda não foi gravada (evita duplicatas de ligações bidirecionais)
+        // Só grava se ainda não foi gravada
         if (!ligacoesGravadas.Contains(chave))
         {
           writer.WriteLine($"{nomeOrigem};{nomeDestino};{ligacao.Distancia}");

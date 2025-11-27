@@ -63,7 +63,7 @@ namespace Proj4
       }
 
       // Inicialização do algoritmo de Dijkstra
-      Dictionary<string, int> distancias = new Dictionary<string, int>();
+      Dictionary<string, long> distancias = new Dictionary<string, long>();
       Dictionary<string, string> anteriores = new Dictionary<string, string>();
       HashSet<string> visitados = new HashSet<string>();
 
@@ -71,7 +71,7 @@ namespace Proj4
       foreach (Cidade cidade in todasCidades)
       {
         string nome = cidade.Nome.Trim();
-        distancias[nome] = int.MaxValue;
+        distancias[nome] = long.MaxValue;
         anteriores[nome] = null;
       }
 
@@ -83,7 +83,7 @@ namespace Proj4
       {
         // Encontra a cidade não visitada com menor distância
         string cidadeAtual = null;
-        int menorDistancia = int.MaxValue;
+        long menorDistancia = long.MaxValue;
 
         foreach (var kvp in distancias)
         {
@@ -95,7 +95,7 @@ namespace Proj4
         }
 
         // Se não encontrou cidade acessível, não há caminho
-        if (cidadeAtual == null || menorDistancia == int.MaxValue)
+        if (cidadeAtual == null || menorDistancia == long.MaxValue)
         {
           break;
         }
@@ -126,8 +126,16 @@ namespace Proj4
           if (visitados.Contains(nomeVizinho))
             continue;
 
-          // Calcula a nova distância
-          int novaDistancia = distancias[cidadeAtual] + ligacao.Distancia;
+          // Calcula a nova distância (verifica se distância atual não é infinita)
+          long novaDistancia;
+          if (distancias[cidadeAtual] == long.MaxValue)
+          {
+            novaDistancia = long.MaxValue;
+          }
+          else
+          {
+            novaDistancia = distancias[cidadeAtual] + ligacao.Distancia;
+          }
 
           // Se a nova distância for menor, atualiza
           if (novaDistancia < distancias[nomeVizinho])
@@ -139,7 +147,7 @@ namespace Proj4
       }
 
       // Verifica se chegamos ao destino
-      if (distancias[destinoNormalizado] == int.MaxValue)
+      if (distancias[destinoNormalizado] == long.MaxValue)
       {
         return new ResultadoDijkstra(new List<string>(), int.MaxValue);
       }
@@ -157,7 +165,8 @@ namespace Proj4
       // Inverte o caminho para ir da origem ao destino
       caminho.Reverse();
 
-      return new ResultadoDijkstra(caminho, distancias[destinoNormalizado]);
+      // Converte de long para int (a distância total retornada é em km e deve caber em int)
+      return new ResultadoDijkstra(caminho, (int)distancias[destinoNormalizado]);
     }
   }
 }
