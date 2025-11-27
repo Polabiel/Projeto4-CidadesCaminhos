@@ -24,7 +24,7 @@ namespace Proj4
     
     // Caminhos dos arquivos de dados
     private readonly string arquivoCidades = Path.Combine(Application.StartupPath, "Dados", "CidadesSaoPaulo.dat");
-    private readonly string arquivoLigacoes = Path.Combine(Application.StartupPath, "Dados", "GrafonibusSaoPaulo.txt");
+    private readonly string arquivoLigacoes = Path.Combine(Application.StartupPath, "Dados", "GrafoOnibusSaoPaulo.txt");
     
     // Cidade atualmente selecionada/carregada no formulário
     private Cidade cidadeAtual = null;
