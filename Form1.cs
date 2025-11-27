@@ -459,9 +459,19 @@ namespace Proj4
         return;
       }
       
-      if (cidadeAtual.AdicionarLigacao(arvore.Atual.Info.Nome.Trim(), distancia))
+      // Obtém a cidade de destino encontrada anteriormente
+      Cidade cidadeDestinoObj = arvore.Atual.Info;
+      string nomeOrigem = cidadeAtual.Nome.Trim();
+      string nomeDestino = cidadeDestinoObj.Nome.Trim();
+      
+      // Adiciona ligação A→B
+      bool adicionouOrigem = cidadeAtual.AdicionarLigacao(nomeDestino, distancia);
+      
+      // Adiciona ligação recíproca B→A (as ligações são bidirecionais conforme documentação)
+      bool adicionouDestino = cidadeDestinoObj.AdicionarLigacao(nomeOrigem, distancia);
+      
+      if (adicionouOrigem || adicionouDestino)
       {
-        MessageBox.Show("Ligação adicionada com sucesso!", "Sucesso", MessageBoxButtons.OK, MessageBoxIcon.Information);
         AtualizarDataGridLigacoes();
         txtNovoDestino.Text = "";
         nudDistancia.Value = 0;
@@ -503,9 +513,21 @@ namespace Proj4
       
       if (resultado == DialogResult.Yes)
       {
-        if (cidadeAtual.RemoverLigacao(cidadeDestino))
+        string nomeOrigem = cidadeAtual.Nome.Trim();
+        
+        // Remove ligação A→B
+        bool removeuOrigem = cidadeAtual.RemoverLigacao(cidadeDestino);
+        
+        // Remove ligação recíproca B→A (as ligações são bidirecionais conforme documentação)
+        Cidade cidadeDestinoBusca = new Cidade(cidadeDestino);
+        if (arvore.Existe(cidadeDestinoBusca))
         {
-          MessageBox.Show("Ligação excluída com sucesso!", "Sucesso", MessageBoxButtons.OK, MessageBoxIcon.Information);
+          Cidade cidadeDestinoObj = arvore.Atual.Info;
+          cidadeDestinoObj.RemoverLigacao(nomeOrigem);
+        }
+        
+        if (removeuOrigem)
+        {
           AtualizarDataGridLigacoes();
           pnlArvore.Invalidate();
           pbMapa.Invalidate();
